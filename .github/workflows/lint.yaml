@@ -30,9 +30,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       
-      - name: Run hardhat node, deploy contracts (& generate contracts typescript output)
-        run: yarn chain & yarn deploy
-
+      - name: Compile contracts
+        env:
+          CI: "true"
+        run: yarn compile
+      
       - name: Run hardhat lint
         run: yarn hardhat:lint --max-warnings=0
 

@@ -7,8 +7,11 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomicfoundation/hardhat-verify";
-import "hardhat-deploy";
-import "hardhat-deploy-ethers";
+// Only import hardhat-deploy if not in CI environment
+if (process.env.CI !== "true") {
+  require("hardhat-deploy");
+  require("hardhat-deploy-ethers");
+}
 import { task } from "hardhat/config";
 import generateTsAbis from "./scripts/generateTsAbis";
 
@@ -41,12 +44,14 @@ const config: HardhatUserConfig = {
     ],
   },
   defaultNetwork: "localhost",
-  namedAccounts: {
-    deployer: {
-      // By default, it will take the first Hardhat account as the deployer
-      default: 0,
+  ...(process.env.CI !== "true" && {
+    namedAccounts: {
+      deployer: {
+        // By default, it will take the first Hardhat account as the deployer
+        default: 0,
+      },
     },
-  },
+  }),
   networks: {
     // View the networks that are pre-configured.
     // If the network you are looking for is not here you can add new network settings
@@ -76,22 +81,10 @@ const config: HardhatUserConfig = {
       optimism: {
         url: `https://opt-mainnet.g.alchemy.com/v2/${providerApiKey}`,
         accounts: [deployerPrivateKey],
-        verify: {
-          etherscan: {
-            apiUrl: "https://api-optimistic.etherscan.io",
-            apiKey: etherscanOptimisticApiKey,
-          },
-        },
       },
       optimismSepolia: {
         url: `https://opt-sepolia.g.alchemy.com/v2/${providerApiKey}`,
         accounts: [deployerPrivateKey],
-        verify: {
-          etherscan: {
-            apiUrl: "https://api-sepolia-optimistic.etherscan.io",
-            apiKey: etherscanOptimisticApiKey,
-          },
-        },
       },
       polygon: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${providerApiKey}`,
@@ -120,22 +113,10 @@ const config: HardhatUserConfig = {
       base: {
         url: "https://mainnet.base.org",
         accounts: [deployerPrivateKey],
-        verify: {
-          etherscan: {
-            apiUrl: "https://api.basescan.org",
-            apiKey: basescanApiKey,
-          },
-        },
       },
       baseSepolia: {
         url: "https://sepolia.base.org",
         accounts: [deployerPrivateKey],
-        verify: {
-          etherscan: {
-            apiUrl: "https://api-sepolia.basescan.org",
-            apiKey: basescanApiKey,
-          },
-        },
       },
       scrollSepolia: {
         url: "https://sepolia-rpc.scroll.io",
@@ -159,12 +140,6 @@ const config: HardhatUserConfig = {
         url: "https://dream-rpc.somnia.network/",
         accounts: [somniaPrivateKey],
         chainId: 50312,
-        verify: {
-          etherscan: {
-            apiUrl: "https://shannon-explorer.somnia.network/",
-            apiKey: "",
-          },
-        },
       },
     }),
   },
@@ -183,22 +158,26 @@ const config: HardhatUserConfig = {
     ],
   },
   // Configuration for etherscan-verify from hardhat-deploy plugin
-  verify: {
-    etherscan: {
-      apiKey: `${etherscanApiKey}`,
+  ...(process.env.CI !== "true" && {
+    verify: {
+      etherscan: {
+        apiKey: `${etherscanApiKey}`,
+      },
     },
-  },
+  }),
   sourcify: {
     enabled: false,
   },
 };
 
-// Extend the deploy task
-task("deploy").setAction(async (args, hre, runSuper) => {
-  // Run the original deploy task
-  await runSuper(args);
-  // Force run the generateTsAbis script
-  await generateTsAbis(hre);
-});
+// Extend the deploy task only if hardhat-deploy is available
+if (process.env.CI !== "true") {
+  task("deploy").setAction(async (args, hre, runSuper) => {
+    // Run the original deploy task
+    await runSuper(args);
+    // Force run the generateTsAbis script
+    await generateTsAbis(hre);
+  });
+}
 
 export default config;

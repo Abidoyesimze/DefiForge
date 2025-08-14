@@ -1,0 +1,76 @@
+{
+  "name": "defiforge",
+  "version": "0.0.1",
+  "private": true,
+  "description": "DeFiForge - Comprehensive DeFi development toolkit for building, testing, and deploying smart contracts with advanced merkle tree utilities",
+  "keywords": [
+    "defi",
+    "ethereum",
+    "smart-contracts",
+    "merkle-trees",
+    "development-tools",
+    "somnia-hackathon",
+    "defiforge"
+  ],
+  "author": "DeFiForge Team",
+  "license": "MIT",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "account": "yarn hardhat:account",
+    "account:generate": "yarn workspace @defiforge/hardhat account:generate",
+    "account:import": "yarn workspace @defiforge/hardhat account:import",
+    "account:reveal-pk": "yarn workspace @defiforge/hardhat account:reveal-pk",
+    "chain": "yarn hardhat:chain",
+    "compile": "yarn hardhat:compile",
+    "deploy": "yarn hardhat:deploy",
+    "fork": "yarn hardhat:fork",
+    "format": "yarn next:format && yarn hardhat:format",
+    "generate": "yarn account:generate",
+    "hardhat:account": "yarn workspace @defiforge/hardhat account",
+    "hardhat:chain": "yarn workspace @defiforge/hardhat chain",
+    "hardhat:check-types": "yarn workspace @defiforge/hardhat check-types",
+    "hardhat:clean": "yarn workspace @defiforge/hardhat clean",
+    "hardhat:compile": "yarn workspace @defiforge/hardhat compile",
+    "hardhat:deploy": "yarn workspace @defiforge/hardhat deploy",
+    "hardhat:flatten": "yarn workspace @defiforge/hardhat flatten",
+    "hardhat:fork": "yarn workspace @defiforge/hardhat fork",
+    "hardhat:format": "yarn workspace @defiforge/hardhat format",
+    "hardhat:generate": "yarn workspace @defiforge/hardhat generate",
+    "hardhat:hardhat-verify": "yarn workspace @defiforge/hardhat hardhat-verify",
+    "hardhat:lint": "yarn workspace @defiforge/hardhat lint",
+    "hardhat:lint-staged": "yarn workspace @defiforge/hardhat lint-staged",
+    "hardhat:test": "yarn workspace @defiforge/hardhat test",
+    "hardhat:verify": "yarn workspace @defiforge/hardhat verify",
+    "postinstall": "husky install",
+    "ipfs": "yarn workspace @defiforge/nextjs ipfs",
+    "lint": "yarn next:lint && yarn hardhat:lint",
+    "next:build": "yarn workspace @defiforge/nextjs build",
+    "next:check-types": "yarn workspace @defiforge/nextjs check-types",
+    "next:format": "yarn workspace @defiforge/nextjs format",
+    "next:lint": "yarn workspace @defiforge/nextjs lint",
+    "next:serve": "yarn workspace @defiforge/nextjs serve",
+    "precommit": "lint-staged",
+    "start": "yarn workspace @defiforge/nextjs dev",
+    "test": "yarn hardhat:test",
+    "vercel": "yarn workspace @defiforge/nextjs vercel",
+    "vercel:login": "yarn workspace @defiforge/nextjs vercel:login",
+    "vercel:yolo": "yarn workspace @defiforge/nextjs vercel:yolo",
+    "verify": "yarn hardhat:verify"
+  },
+  "devDependencies": {
+    "husky": "~9.1.6",
+    "lint-staged": "~13.2.2"
+  },
+  "packageManager": "yarn@3.2.3",
+  "engines": {
+    "node": ">=20.18.3"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "papaparse": "^5.5.2"
+  }
+}

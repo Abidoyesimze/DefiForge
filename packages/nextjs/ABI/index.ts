@@ -1,10 +1,10 @@
 // Import all contract ABIs
-import ERC20FactoryABI from './ERC20Factory.json';
-import DeFiUtilsABI from './DeFiUtils.json';
-import ContractAnalyzerABI from './ContractAnalyzer.json';
-import ContractTemplatesABI from './ContractTemplates.json';
-import MerkleProofValidatorABI from './MerkleProofValidator.json';
-import MerkleProofABI from './MerkleProof.json';
+import ContractAnalyzerABI from "./ContractAnalyzer.json";
+import ContractTemplatesABI from "./ContractTemplates.json";
+import DeFiUtilsABI from "./DeFiUtils.json";
+import ERC20FactoryABI from "./ERC20Factory.json";
+import MerkleProofABI from "./MerkleProof.json";
+import MerkleProofValidatorABI from "./MerkleProofValidator.json";
 
 // Export all ABIs
 export {
@@ -24,4 +24,4 @@ export default {
   ContractTemplates: ContractTemplatesABI,
   MerkleProofValidator: MerkleProofValidatorABI,
   MerkleProof: MerkleProofABI,
-}; 
+};

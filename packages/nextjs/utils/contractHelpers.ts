@@ -1,5 +1,5 @@
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import deployedContracts from "../contracts/deployedContracts";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 
 // Helper function to get contract address by name and chain ID
 export const getContractAddress = (contractName: string, chainId: number = 50312) => {
@@ -7,12 +7,12 @@ export const getContractAddress = (contractName: string, chainId: number = 50312
   if (!contracts) {
     throw new Error(`No contracts found for chain ID ${chainId}`);
   }
-  
+
   const contract = contracts[contractName as keyof typeof contracts];
   if (!contract) {
     throw new Error(`Contract ${contractName} not found on chain ${chainId}`);
   }
-  
+
   return contract.address;
 };
 
@@ -22,12 +22,12 @@ export const getContractABI = (contractName: string, chainId: number = 50312) =>
   if (!contracts) {
     throw new Error(`No contracts found for chain ID ${chainId}`);
   }
-  
+
   const contract = contracts[contractName as keyof typeof contracts];
   if (!contract) {
     throw new Error(`Contract ${contractName} not found on chain ${chainId}`);
   }
-  
+
   return contract.abi;
 };
 
@@ -52,4 +52,4 @@ export const NETWORK_INFO = {
     symbol: "STT",
     decimals: 18,
   },
-} as const; 
+} as const;

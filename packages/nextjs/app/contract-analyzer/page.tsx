@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { toast } from "react-toastify";
-import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
 import { ContractAnalyzerABI } from "../../ABI";
+import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
+import { toast } from "react-toastify";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 const ContractAnalyzerPage = () => {
   const { address, isConnected } = useAccount();
@@ -72,9 +72,7 @@ const ContractAnalyzerPage = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
-            <p className="text-gray-300 mb-6">
-              Please connect your wallet to Somnia testnet to analyze contracts.
-            </p>
+            <p className="text-gray-300 mb-6">Please connect your wallet to Somnia testnet to analyze contracts.</p>
           </div>
         ) : (
           <>
@@ -82,17 +80,15 @@ const ContractAnalyzerPage = () => {
             <div className="max-w-4xl mx-auto mb-12">
               <div className="bg-[#1c2941] p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-6">Analyze Smart Contract</h2>
-                
+
                 <div className="space-y-6">
                   {/* Contract Address Input */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Contract Address *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Contract Address *</label>
                     <input
                       type="text"
                       value={contractAddress}
-                      onChange={(e) => setContractAddress(e.target.value)}
+                      onChange={e => setContractAddress(e.target.value)}
                       placeholder="0x..."
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
@@ -134,23 +130,23 @@ const ContractAnalyzerPage = () => {
               <div className="max-w-4xl mx-auto">
                 <div className="bg-[#1c2941] p-8 rounded-lg">
                   <h2 className="text-2xl font-bold mb-6">Analysis Results</h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="p-4 bg-[#0f1a2e] rounded-lg">
                       <h3 className="text-lg font-semibold mb-2 text-purple-400">Contract Size</h3>
                       <p className="text-2xl text-white">{mockAnalysisResult.contractSize}</p>
                     </div>
-                    
+
                     <div className="p-4 bg-[#0f1a2e] rounded-lg">
                       <h3 className="text-lg font-semibold mb-2 text-purple-400">Deployment Gas</h3>
                       <p className="text-2xl text-white">{mockAnalysisResult.estimatedDeploymentGas}</p>
                     </div>
-                    
+
                     <div className="p-4 bg-[#0f1a2e] rounded-lg">
                       <h3 className="text-lg font-semibold mb-2 text-purple-400">Code Size</h3>
                       <p className="text-2xl text-white">{mockAnalysisResult.codeSize}</p>
                     </div>
-                    
+
                     <div className="p-4 bg-[#0f1a2e] rounded-lg">
                       <h3 className="text-lg font-semibold mb-2 text-purple-400">Contract Balance</h3>
                       <p className="text-2xl text-white">{mockAnalysisResult.balance}</p>
@@ -162,16 +158,28 @@ const ContractAnalyzerPage = () => {
                       <h3 className="text-lg font-semibold mb-2 text-purple-400">Security Features</h3>
                       <div className="space-y-2">
                         <div className="flex items-center">
-                          <span className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.isContract ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                          <span className="text-gray-300">Is Contract: {mockAnalysisResult.isContract ? 'Yes' : 'No'}</span>
+                          <span
+                            className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.isContract ? "bg-green-500" : "bg-red-500"}`}
+                          ></span>
+                          <span className="text-gray-300">
+                            Is Contract: {mockAnalysisResult.isContract ? "Yes" : "No"}
+                          </span>
                         </div>
                         <div className="flex items-center">
-                          <span className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.hasFallback ? 'bg-green-500' : 'bg-gray-500'}`}></span>
-                          <span className="text-gray-300">Has Fallback: {mockAnalysisResult.hasFallback ? 'Yes' : 'No'}</span>
+                          <span
+                            className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.hasFallback ? "bg-green-500" : "bg-gray-500"}`}
+                          ></span>
+                          <span className="text-gray-300">
+                            Has Fallback: {mockAnalysisResult.hasFallback ? "Yes" : "No"}
+                          </span>
                         </div>
                         <div className="flex items-center">
-                          <span className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.hasReceive ? 'bg-green-500' : 'bg-gray-500'}`}></span>
-                          <span className="text-gray-300">Has Receive: {mockAnalysisResult.hasReceive ? 'Yes' : 'No'}</span>
+                          <span
+                            className={`w-3 h-3 rounded-full mr-2 ${mockAnalysisResult.hasReceive ? "bg-green-500" : "bg-gray-500"}`}
+                          ></span>
+                          <span className="text-gray-300">
+                            Has Receive: {mockAnalysisResult.hasReceive ? "Yes" : "No"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -234,7 +242,7 @@ const ContractAnalyzerPage = () => {
                     <p className="text-sm text-gray-300">Our deployed token factory contract</p>
                     <code className="text-xs text-purple-400">{CONTRACT_ADDRESSES.ERC20Factory.slice(0, 10)}...</code>
                   </button>
-                  
+
                   <button
                     onClick={() => setContractAddress(CONTRACT_ADDRESSES.DeFiUtils)}
                     className="p-4 bg-[#0f1a2e] rounded-lg text-left hover:bg-[#243a5f] transition-colors"
@@ -253,12 +261,8 @@ const ContractAnalyzerPage = () => {
         <div className="mt-12 text-center">
           <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
-            <p className="text-sm text-gray-300 mb-2">
-              Contract Analyzer deployed at:
-            </p>
-            <code className="text-purple-400 text-sm break-all">
-              {CONTRACT_ADDRESSES.ContractAnalyzer}
-            </code>
+            <p className="text-sm text-gray-300 mb-2">Contract Analyzer deployed at:</p>
+            <code className="text-purple-400 text-sm break-all">{CONTRACT_ADDRESSES.ContractAnalyzer}</code>
           </div>
         </div>
       </div>
@@ -266,4 +270,4 @@ const ContractAnalyzerPage = () => {
   );
 };
 
-export default ContractAnalyzerPage; 
+export default ContractAnalyzerPage;

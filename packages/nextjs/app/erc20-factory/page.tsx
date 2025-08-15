@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { toast } from "react-toastify";
-import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
 import { ERC20FactoryABI } from "../../ABI";
+import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
+import { toast } from "react-toastify";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 const ERC20FactoryPage = () => {
   const { address, isConnected } = useAccount();
@@ -32,14 +32,14 @@ const ERC20FactoryPage = () => {
 
     try {
       const supplyInWei = BigInt(initialSupply) * BigInt(10 ** parseInt(decimals));
-      
+
       createToken({
         address: CONTRACT_ADDRESSES.ERC20Factory,
         abi: ERC20FactoryABI.abi,
         functionName: "createToken",
         args: [tokenName, tokenSymbol, supplyInWei, parseInt(decimals)],
       });
-      
+
       toast.info("Creating token...");
     } catch (error) {
       console.error("Error creating token:", error);
@@ -54,9 +54,7 @@ const ERC20FactoryPage = () => {
           <div className="text-center">
             <div className="text-6xl mb-4">🎉</div>
             <h1 className="text-3xl font-bold mb-4">Token Created Successfully!</h1>
-            <p className="text-gray-300 mb-6">
-              Your ERC20 token has been deployed to the blockchain.
-            </p>
+            <p className="text-gray-300 mb-6">Your ERC20 token has been deployed to the blockchain.</p>
             <div className="bg-[#1c2941] p-6 rounded-lg mb-6">
               <h3 className="text-xl font-semibold mb-4">Token Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
@@ -106,13 +104,11 @@ const ERC20FactoryPage = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
-            <p className="text-gray-300 mb-6">
-              Please connect your wallet to Somnia testnet to create tokens.
-            </p>
+            <p className="text-gray-300 mb-6">Please connect your wallet to Somnia testnet to create tokens.</p>
             <div className="bg-[#1c2941] p-6 rounded-lg max-w-md mx-auto">
               <h3 className="text-lg font-semibold mb-2">Network Requirements</h3>
               <p className="text-sm text-gray-300">
-                Make sure you're connected to Somnia Testnet (Chain ID: 50312)
+                Make sure you&apos;re connected to Somnia Testnet (Chain ID: 50312)
               </p>
             </div>
           </div>
@@ -121,17 +117,15 @@ const ERC20FactoryPage = () => {
           <div className="max-w-2xl mx-auto">
             <div className="bg-[#1c2941] p-8 rounded-lg">
               <h2 className="text-2xl font-bold mb-6">Create New Token</h2>
-              
+
               <div className="space-y-6">
                 {/* Token Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Token Name *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Token Name *</label>
                   <input
                     type="text"
                     value={tokenName}
-                    onChange={(e) => setTokenName(e.target.value)}
+                    onChange={e => setTokenName(e.target.value)}
                     placeholder="e.g., My Awesome Token"
                     className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                   />
@@ -139,13 +133,11 @@ const ERC20FactoryPage = () => {
 
                 {/* Token Symbol */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Token Symbol *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Token Symbol *</label>
                   <input
                     type="text"
                     value={tokenSymbol}
-                    onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
+                    onChange={e => setTokenSymbol(e.target.value.toUpperCase())}
                     placeholder="e.g., MAT"
                     maxLength={10}
                     className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
@@ -154,30 +146,24 @@ const ERC20FactoryPage = () => {
 
                 {/* Initial Supply */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Initial Supply *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Initial Supply *</label>
                   <input
                     type="number"
                     value={initialSupply}
-                    onChange={(e) => setInitialSupply(e.target.value)}
+                    onChange={e => setInitialSupply(e.target.value)}
                     placeholder="e.g., 1000000"
                     min="1"
                     className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                   />
-                  <p className="text-sm text-gray-400 mt-1">
-                    Total tokens to be minted initially
-                  </p>
+                  <p className="text-sm text-gray-400 mt-1">Total tokens to be minted initially</p>
                 </div>
 
                 {/* Decimals */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Decimals
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Decimals</label>
                   <select
                     value={decimals}
-                    onChange={(e) => setDecimals(e.target.value)}
+                    onChange={e => setDecimals(e.target.value)}
                     className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
                   >
                     <option value="18">18 (Standard)</option>
@@ -185,9 +171,7 @@ const ERC20FactoryPage = () => {
                     <option value="8">8 (Bitcoin Style)</option>
                     <option value="0">0 (Whole Numbers)</option>
                   </select>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Number of decimal places for token divisibility
-                  </p>
+                  <p className="text-sm text-gray-400 mt-1">Number of decimal places for token divisibility</p>
                 </div>
 
                 {/* Create Button */}
@@ -222,12 +206,8 @@ const ERC20FactoryPage = () => {
         <div className="mt-12 text-center">
           <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
-            <p className="text-sm text-gray-300 mb-2">
-              ERC20 Factory deployed at:
-            </p>
-            <code className="text-purple-400 text-sm break-all">
-              {CONTRACT_ADDRESSES.ERC20Factory}
-            </code>
+            <p className="text-sm text-gray-300 mb-2">ERC20 Factory deployed at:</p>
+            <code className="text-purple-400 text-sm break-all">{CONTRACT_ADDRESSES.ERC20Factory}</code>
           </div>
         </div>
       </div>
@@ -235,4 +215,4 @@ const ERC20FactoryPage = () => {
   );
 };
 
-export default ERC20FactoryPage; 
+export default ERC20FactoryPage;

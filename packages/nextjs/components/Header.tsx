@@ -18,9 +18,15 @@ export const Header = () => {
 
   // Protect protected pages
   useEffect(() => {
-    if ((pathname === "/merkle-proof-generator" || pathname === "/merkle-validator" || 
-         pathname === "/erc20-factory" || pathname === "/defi-utils" || 
-         pathname === "/contract-analyzer" || pathname === "/contract-templates") && !isConnected) {
+    if (
+      (pathname === "/merkle-proof-generator" ||
+        pathname === "/merkle-validator" ||
+        pathname === "/erc20-factory" ||
+        pathname === "/defi-utils" ||
+        pathname === "/contract-analyzer" ||
+        pathname === "/contract-templates") &&
+      !isConnected
+    ) {
       notification.error("Please connect your wallet to access this feature");
       router.push("/");
     }

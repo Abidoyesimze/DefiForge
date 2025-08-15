@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
-import { toast } from "react-toastify";
 import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
+import { toast } from "react-toastify";
+import { useAccount } from "wagmi";
 
 const ContractTemplatesPage = () => {
   const { address, isConnected } = useAccount();
@@ -27,12 +27,7 @@ const ContractTemplatesPage = () => {
       id: "multi-sig-wallet",
       name: "Multi-Signature Wallet",
       description: "Secure multi-signature wallet for team funds and governance",
-      features: [
-        "Configurable signer count",
-        "Threshold-based approvals",
-        "Add/remove signers",
-        "Emergency pause",
-      ],
+      features: ["Configurable signer count", "Threshold-based approvals", "Add/remove signers", "Emergency pause"],
       icon: "🔐",
       category: "Security",
     },
@@ -40,12 +35,7 @@ const ContractTemplatesPage = () => {
       id: "basic-erc20",
       name: "Basic ERC20",
       description: "Standard ERC20 token with basic functionality",
-      features: [
-        "Standard ERC20 compliance",
-        "Mintable and burnable",
-        "Pausable functionality",
-        "Owner controls",
-      ],
+      features: ["Standard ERC20 compliance", "Mintable and burnable", "Pausable functionality", "Owner controls"],
       icon: "🪙",
       category: "Token Management",
     },
@@ -53,12 +43,7 @@ const ContractTemplatesPage = () => {
       id: "reentrancy-guard",
       name: "Reentrancy Guard",
       description: "Security pattern to prevent reentrancy attacks",
-      features: [
-        "Prevents reentrancy attacks",
-        "Easy to integrate",
-        "Gas efficient",
-        "Battle tested",
-      ],
+      features: ["Prevents reentrancy attacks", "Easy to integrate", "Gas efficient", "Battle tested"],
       icon: "🛡️",
       category: "Security",
     },
@@ -69,7 +54,7 @@ const ContractTemplatesPage = () => {
       toast.error("Please connect your wallet to deploy templates");
       return;
     }
-    
+
     setSelectedTemplate(templateId);
     toast.info(`Preparing to deploy ${templateId} template...`);
   };
@@ -250,9 +235,7 @@ contract BasicMultiSig is Ownable, ReentrancyGuard {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contract Templates</h1>
-          <p className="text-xl text-gray-300">
-            Ready-to-use smart contract templates for common DeFi use cases
-          </p>
+          <p className="text-xl text-gray-300">Ready-to-use smart contract templates for common DeFi use cases</p>
         </div>
 
         {/* Wallet Connection Check */}
@@ -268,18 +251,16 @@ contract BasicMultiSig is Ownable, ReentrancyGuard {
           <>
             {/* Templates Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-12">
-              {templates.map((template) => (
+              {templates.map(template => (
                 <div key={template.id} className="bg-[#1c2941] rounded-lg p-6 hover:bg-[#243a5f] transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-4xl">{template.icon}</div>
-                    <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full">
-                      {template.category}
-                    </span>
+                    <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full">{template.category}</span>
                   </div>
-                  
+
                   <h3 className="text-xl font-bold mb-2">{template.name}</h3>
                   <p className="text-gray-300 mb-4">{template.description}</p>
-                  
+
                   <div className="mb-6">
                     <h4 className="text-sm font-semibold text-purple-400 mb-2">Features:</h4>
                     <ul className="text-sm text-gray-300 space-y-1">
@@ -291,7 +272,7 @@ contract BasicMultiSig is Ownable, ReentrancyGuard {
                       ))}
                     </ul>
                   </div>
-                  
+
                   <button
                     onClick={() => handleDeployTemplate(template.id)}
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors"
@@ -369,12 +350,8 @@ contract BasicMultiSig is Ownable, ReentrancyGuard {
         <div className="mt-12 text-center">
           <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
-            <p className="text-sm text-gray-300 mb-2">
-              Contract Templates deployed at:
-            </p>
-            <code className="text-purple-400 text-sm break-all">
-              {CONTRACT_ADDRESSES.ContractTemplates}
-            </code>
+            <p className="text-sm text-gray-300 mb-2">Contract Templates deployed at:</p>
+            <code className="text-purple-400 text-sm break-all">{CONTRACT_ADDRESSES.ContractTemplates}</code>
           </div>
         </div>
       </div>
@@ -382,4 +359,4 @@ contract BasicMultiSig is Ownable, ReentrancyGuard {
   );
 };
 
-export default ContractTemplatesPage; 
+export default ContractTemplatesPage;

@@ -9,30 +9,31 @@ import { useAccount } from "wagmi";
 import {
   ArrowPathIcon,
   ArrowUpTrayIcon,
+  BeakerIcon,
   BoltIcon,
   ChartBarIcon,
   ClockIcon,
   CodeBracketIcon,
-  CubeIcon,
-  DocumentCheckIcon,
-  ScaleIcon,
-  CurrencyDollarIcon,
-  ShieldCheckIcon,
   CogIcon,
+  CpuChipIcon,
+  CubeIcon,
+  CurrencyDollarIcon,
+  DocumentCheckIcon,
   DocumentTextIcon,
-  BeakerIcon,
+  GlobeAltIcon,
   KeyIcon,
   RocketLaunchIcon,
-  SparklesIcon,
-  GlobeAltIcon,
-  CpuChipIcon,
+  ScaleIcon,
   ServerStackIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 const features = [
   {
     title: "ERC20 Factory",
-    description: "Create custom ERC20 tokens with ease. Deploy tokens with custom names, symbols, and initial supplies.",
+    description:
+      "Create custom ERC20 tokens with ease. Deploy tokens with custom names, symbols, and initial supplies.",
     icon: CurrencyDollarIcon,
     link: "/erc20-factory",
     color: "from-purple-500 to-pink-500",
@@ -167,7 +168,7 @@ const Home = () => {
   // Auto-rotate featured features
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveFeature((prev) => (prev + 1) % features.length);
+      setActiveFeature(prev => (prev + 1) % features.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -198,7 +199,7 @@ const Home = () => {
               <div className="absolute top-40 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
               <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
             </div>
-            
+
             <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white relative z-10">
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                 DefiForge
@@ -208,10 +209,10 @@ const Home = () => {
               The Ultimate DeFi Development Toolkit
             </p>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Build, analyze, and deploy DeFi protocols with our comprehensive suite of smart contract tools. 
-              From token creation to advanced analytics, we've got everything you need to build the future of finance.
+              Build, analyze, and deploy DeFi protocols with our comprehensive suite of smart contract tools. From token
+              creation to advanced analytics, we&apos;ve got everything you need to build the future of finance.
             </p>
-            
+
             {/* Network Badge */}
             <div className="mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full text-sm font-medium">
@@ -219,7 +220,7 @@ const Home = () => {
                 Live on Somnia Testnet • Chain ID: 50312
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
                 onClick={() => handleNavigateToFeature("/erc20-factory")}
@@ -243,11 +244,11 @@ const Home = () => {
                 </span>
               </button>
             </div>
-            
+
             {/* Quick Navigation */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
               {features.map((feature, index) => (
-            <button
+                <button
                   key={index}
                   onClick={() => handleNavigateToFeature(feature.link)}
                   className="group p-3 bg-[#1c2941] hover:bg-[#243a5f] rounded-lg border border-gray-600 hover:border-purple-500 transition-all duration-300 hover:scale-105"
@@ -258,7 +259,7 @@ const Home = () => {
                       {feature.title}
                     </span>
                   </div>
-            </button>
+                </button>
               ))}
             </div>
           </div>
@@ -267,12 +268,15 @@ const Home = () => {
         {/* Network Information Section */}
         <div className="py-12 bg-[#1c2941] rounded-lg border border-gray-600">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-white">🌐 Built on <span className="text-purple-400">Somnia Testnet</span></h2>
+            <h2 className="text-2xl font-bold mb-4 text-white">
+              🌐 Built on <span className="text-purple-400">Somnia Testnet</span>
+            </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              DefiForge is deployed on Somnia Network's testnet, providing a fast, secure, and cost-effective environment for DeFi development and testing.
+              DefiForge is deployed on Somnia Network&apos;s testnet, providing a fast, secure, and cost-effective
+              environment for DeFi development and testing.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <div className="text-center p-4">
               <div className="text-2xl mb-2">⚡</div>
@@ -295,7 +299,7 @@ const Home = () => {
               <p className="text-sm text-gray-400">Free STT tokens available</p>
             </div>
           </div>
-          
+
           <div className="mt-8 text-center">
             <div className="inline-flex items-center px-4 py-2 bg-[#0f1a2e] rounded-lg border border-gray-600">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
@@ -307,12 +311,15 @@ const Home = () => {
         {/* What is DefiForge Section */}
         <div className="py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-white">What is <span className="text-purple-400">DefiForge</span>?</h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              What is <span className="text-purple-400">DefiForge</span>?
+            </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              DefiForge is a comprehensive DeFi development platform that provides developers with all the tools they need to build, deploy, and manage decentralized finance applications.
+              DefiForge is a comprehensive DeFi development platform that provides developers with all the tools they
+              need to build, deploy, and manage decentralized finance applications.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div className="bg-[#1c2941] p-8 rounded-lg border border-gray-600">
               <div className="text-4xl mb-4">🚀</div>
@@ -325,7 +332,7 @@ const Home = () => {
                 <li>• ERC20 token factory with custom parameters</li>
               </ul>
             </div>
-            
+
             <div className="bg-[#1c2941] p-8 rounded-lg border border-gray-600">
               <div className="text-4xl mb-4">💎</div>
               <h3 className="text-xl font-semibold mb-4 text-white">For Projects</h3>
@@ -344,20 +351,13 @@ const Home = () => {
         <div className="py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className="text-center group hover:scale-105 transition-transform duration-300"
-              >
+              <div key={index} className="text-center group hover:scale-105 transition-transform duration-300">
                 <div className="bg-gradient-to-br from-[#1c2941] to-[#243a5f] p-6 rounded-xl border border-gray-600 hover:border-purple-500 transition-colors duration-300">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
                     {stat.value}
                   </div>
-                  <div className="text-lg font-semibold text-purple-400 mb-1">
-                    {stat.label}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    {stat.description}
-                  </div>
+                  <div className="text-lg font-semibold text-purple-400 mb-1">{stat.label}</div>
+                  <div className="text-sm text-gray-400">{stat.description}</div>
                 </div>
               </div>
             ))}
@@ -377,12 +377,12 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-white">Production Ready</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  All contracts are deployed on Somnia testnet and ready for production use. 
-                  Built with OpenZeppelin standards and best practices.
+                  All contracts are deployed on Somnia testnet and ready for production use. Built with OpenZeppelin
+                  standards and best practices.
                 </p>
               </div>
             </div>
-            
+
             <div className="group p-8 rounded-xl bg-gradient-to-br from-[#1c2941] to-[#243a5f] hover:from-[#243a5f] hover:to-[#1c2941] transition-all duration-300 hover:scale-105 border border-gray-600 hover:border-purple-500">
               <div className="text-center">
                 <div className="inline-flex p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -390,12 +390,12 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-white">Security First</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  Built with OpenZeppelin contracts and best practices for maximum security. 
-                  Comprehensive testing and auditing included.
+                  Built with OpenZeppelin contracts and best practices for maximum security. Comprehensive testing and
+                  auditing included.
                 </p>
               </div>
             </div>
-            
+
             <div className="group p-8 rounded-xl bg-gradient-to-br from-[#1c2941] to-[#243a5f] hover:from-[#243a5f] hover:to-[#1c2941] transition-all duration-300 hover:scale-105 border border-gray-600 hover:border-purple-500">
               <div className="text-center">
                 <div className="inline-flex p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -403,8 +403,8 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-white">Developer Friendly</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  Easy-to-use interfaces and comprehensive documentation for developers. 
-                  Built by developers, for developers.
+                  Easy-to-use interfaces and comprehensive documentation for developers. Built by developers, for
+                  developers.
                 </p>
               </div>
             </div>
@@ -419,13 +419,13 @@ const Home = () => {
               Everything you need to build, deploy, and manage DeFi protocols
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1c2941] to-[#243a5f] hover:from-[#243a5f] hover:to-[#1c2941] transition-all duration-500 hover:scale-105 cursor-pointer border border-gray-600 hover:border-purple-500 ${
-                  activeFeature === index ? 'ring-2 ring-purple-500 ring-opacity-50' : ''
+                  activeFeature === index ? "ring-2 ring-purple-500 ring-opacity-50" : ""
                 }`}
                 onClick={() => handleNavigateToFeature(feature.link)}
               >
@@ -435,32 +435,28 @@ const Home = () => {
                     {feature.badge}
                   </span>
                 </div>
-                
+
                 {/* Icon */}
                 <div className={`p-6 bg-gradient-to-r ${feature.color} rounded-t-xl`}>
                   <feature.icon className="h-12 w-12 text-white" />
                 </div>
-                
+
                 {/* Content */}
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-3 text-white group-hover:text-purple-400 transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-300 mb-4 leading-relaxed">
-                    {feature.description}
-                  </p>
-                  
+                  <p className="text-gray-300 mb-4 leading-relaxed">{feature.description}</p>
+
                   {/* Stats */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-purple-400 font-medium">
-                      {feature.stats}
-                    </span>
+                    <span className="text-sm text-purple-400 font-medium">{feature.stats}</span>
                     <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <ArrowUpTrayIcon className="w-4 h-4 text-white" />
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Hover effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
@@ -476,11 +472,11 @@ const Home = () => {
               Discover how DefiForge can power your next DeFi project
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {useCases.map((useCase, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="group p-6 rounded-xl bg-gradient-to-br from-[#1c2941] to-[#243a5f] hover:from-[#243a5f] hover:to-[#1c2941] transition-all duration-300 hover:scale-105 border border-gray-600 hover:border-purple-500"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -489,10 +485,8 @@ const Home = () => {
                 <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-purple-400 transition-colors">
                   {useCase.title}
                 </h3>
-                <p className="text-gray-300 mb-4 leading-relaxed">
-                  {useCase.description}
-                </p>
-                
+                <p className="text-gray-300 mb-4 leading-relaxed">{useCase.description}</p>
+
                 {/* Examples */}
                 <div className="space-y-2">
                   {useCase.examples.map((example, idx) => (
@@ -515,7 +509,7 @@ const Home = () => {
               Get started with DefiForge in just a few simple steps
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
               { step: "1", title: "Connect Wallet", desc: "Connect your wallet to Somnia testnet", icon: "🔗" },
@@ -535,9 +529,7 @@ const Home = () => {
                 <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-purple-400 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  {item.desc}
-                </p>
+                <p className="text-gray-300 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -549,14 +541,14 @@ const Home = () => {
           <div className="absolute inset-0 -z-10">
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"></div>
           </div>
-          
+
           <h2 className="text-4xl font-bold mb-6 text-white">
             Ready to Build the <span className="text-purple-400">Future of DeFi</span>?
           </h2>
           <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
             Join thousands of developers building the next generation of decentralized finance with DefiForge
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <button
               onClick={() => handleNavigateToFeature("/erc20-factory")}
@@ -570,7 +562,7 @@ const Home = () => {
                 {isButtonLoading ? "Connecting..." : isConnected ? "Start Building Now" : "Connect Wallet to Continue"}
               </span>
             </button>
-            
+
             <button
               onClick={() => router.push("/contract-analyzer")}
               className="group px-10 py-4 bg-transparent border-2 border-purple-600 text-purple-400 hover:text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-purple-600 hover:scale-105 hover:shadow-xl"
@@ -580,8 +572,8 @@ const Home = () => {
                 Explore Tools
               </span>
             </button>
-            </div>
-          
+          </div>
+
           {/* Additional info */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center">

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { toast } from "react-toastify";
-import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
 import { MerkleProofValidatorABI } from "../../ABI";
+import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
+import { toast } from "react-toastify";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 const MerkleValidatorPage = () => {
   const { address, isConnected } = useAccount();
@@ -68,8 +68,8 @@ const MerkleValidatorPage = () => {
     try {
       setIsValidating(true);
       // Convert proof string to array of bytes32
-      const proofArray = proof.split(',').map(p => p.trim());
-      
+      const proofArray = proof.split(",").map(p => p.trim());
+
       validateProof({
         address: CONTRACT_ADDRESSES.MerkleProofValidator,
         abi: MerkleProofValidatorABI.abi,
@@ -87,7 +87,9 @@ const MerkleValidatorPage = () => {
   const generateSampleData = () => {
     // Generate sample Merkle data for demonstration
     setMerkleRoot("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef");
-    setProof("0x1111111111111111111111111111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222222222222222222222222222");
+    setProof(
+      "0x1111111111111111111111111111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222222222222222222222222222",
+    );
     setLeaf("0x3333333333333333333333333333333333333333333333333333333333333333");
     setDescription("Sample whitelist for NFT mint");
   };
@@ -98,9 +100,7 @@ const MerkleValidatorPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Merkle Proof Validator</h1>
-          <p className="text-xl text-gray-300">
-            Validate Merkle proofs on-chain for efficient whitelists and airdrops
-          </p>
+          <p className="text-xl text-gray-300">Validate Merkle proofs on-chain for efficient whitelists and airdrops</p>
         </div>
 
         {/* Wallet Connection Check */}
@@ -128,38 +128,30 @@ const MerkleValidatorPage = () => {
               {/* Register Merkle Root */}
               <div className="bg-[#1c2941] rounded-lg p-8">
                 <h2 className="text-2xl font-bold mb-6">Register Merkle Root</h2>
-                
+
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Merkle Root *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Merkle Root *</label>
                     <input
                       type="text"
                       value={merkleRoot}
-                      onChange={(e) => setMerkleRoot(e.target.value)}
+                      onChange={e => setMerkleRoot(e.target.value)}
                       placeholder="0x..."
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      The root hash of your Merkle tree
-                    </p>
+                    <p className="text-sm text-gray-400 mt-1">The root hash of your Merkle tree</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Description *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
                     <input
                       type="text"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={e => setDescription(e.target.value)}
                       placeholder="e.g., NFT whitelist, token airdrop"
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      Brief description of what this Merkle tree represents
-                    </p>
+                    <p className="text-sm text-gray-400 mt-1">Brief description of what this Merkle tree represents</p>
                   </div>
 
                   <button
@@ -190,51 +182,41 @@ const MerkleValidatorPage = () => {
               {/* Validate Proof */}
               <div className="bg-[#1c2941] rounded-lg p-8">
                 <h2 className="text-2xl font-bold mb-6">Validate Merkle Proof</h2>
-                
+
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Merkle Root *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Merkle Root *</label>
                     <input
                       type="text"
                       value={merkleRoot}
-                      onChange={(e) => setMerkleRoot(e.target.value)}
+                      onChange={e => setMerkleRoot(e.target.value)}
                       placeholder="0x..."
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Merkle Proof *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Merkle Proof *</label>
                     <textarea
                       value={proof}
-                      onChange={(e) => setProof(e.target.value)}
+                      onChange={e => setProof(e.target.value)}
                       placeholder="0x...,0x...,0x..."
                       rows={3}
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      Comma-separated list of proof hashes
-                    </p>
+                    <p className="text-sm text-gray-400 mt-1">Comma-separated list of proof hashes</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Leaf (Address Hash) *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Leaf (Address Hash) *</label>
                     <input
                       type="text"
                       value={leaf}
-                      onChange={(e) => setLeaf(e.target.value)}
+                      onChange={e => setLeaf(e.target.value)}
                       placeholder="0x..."
                       className="w-full px-4 py-3 bg-[#0f1a2e] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      The hash of the address you want to validate
-                    </p>
+                    <p className="text-sm text-gray-400 mt-1">The hash of the address you want to validate</p>
                   </div>
 
                   <button
@@ -268,7 +250,7 @@ const MerkleValidatorPage = () => {
               <div className="mt-12 max-w-4xl mx-auto">
                 <div className="bg-[#1c2941] p-8 rounded-lg">
                   <h2 className="text-2xl font-bold mb-6">Operation Results</h2>
-                  
+
                   {isRegistered && (
                     <div className="mb-6 p-4 bg-green-900 bg-opacity-20 border border-green-600 rounded-lg">
                       <h3 className="text-lg font-semibold text-green-400 mb-2">✅ Merkle Root Registered</h3>
@@ -289,9 +271,7 @@ const MerkleValidatorPage = () => {
                   {isValidationComplete && (
                     <div className="p-4 bg-blue-900 bg-opacity-20 border border-blue-600 rounded-lg">
                       <h3 className="text-lg font-semibold text-blue-400 mb-2">🔍 Proof Validation Complete</h3>
-                      <p className="text-gray-300">
-                        The Merkle proof has been validated on-chain.
-                      </p>
+                      <p className="text-gray-300">The Merkle proof has been validated on-chain.</p>
                       <div className="mt-3 text-sm">
                         <span className="text-gray-400">Validation Result:</span>
                         <span className="ml-2 text-green-400">Success</span>
@@ -310,30 +290,24 @@ const MerkleValidatorPage = () => {
             <div className="mt-12 max-w-4xl mx-auto">
               <div className="bg-[#1c2941] p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-6">How Merkle Proofs Work</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
                     <div className="text-3xl mb-3">🌳</div>
                     <h3 className="font-semibold mb-2">1. Create Merkle Tree</h3>
-                    <p className="text-sm text-gray-300">
-                      Hash your address list to create a tree structure
-                    </p>
+                    <p className="text-sm text-gray-300">Hash your address list to create a tree structure</p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-3xl mb-3">🔑</div>
                     <h3 className="font-semibold mb-2">2. Generate Proofs</h3>
-                    <p className="text-sm text-gray-300">
-                      Create proof arrays for each address in the list
-                    </p>
+                    <p className="text-sm text-gray-300">Create proof arrays for each address in the list</p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-3xl mb-3">✅</div>
                     <h3 className="font-semibold mb-2">3. Validate On-Chain</h3>
-                    <p className="text-sm text-gray-300">
-                      Use proofs to verify membership without storing full list
-                    </p>
+                    <p className="text-sm text-gray-300">Use proofs to verify membership without storing full list</p>
                   </div>
                 </div>
 
@@ -367,12 +341,8 @@ const MerkleValidatorPage = () => {
         <div className="mt-12 text-center">
           <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
-            <p className="text-sm text-gray-300 mb-2">
-              Merkle Proof Validator deployed at:
-            </p>
-            <code className="text-purple-400 text-sm break-all">
-              {CONTRACT_ADDRESSES.MerkleProofValidator}
-            </code>
+            <p className="text-sm text-gray-300 mb-2">Merkle Proof Validator deployed at:</p>
+            <code className="text-purple-400 text-sm break-all">{CONTRACT_ADDRESSES.MerkleProofValidator}</code>
           </div>
         </div>
       </div>
@@ -380,4 +350,4 @@ const MerkleValidatorPage = () => {
   );
 };
 
-export default MerkleValidatorPage; 
+export default MerkleValidatorPage;

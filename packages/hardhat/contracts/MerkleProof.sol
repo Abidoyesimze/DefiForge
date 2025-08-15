@@ -29,7 +29,6 @@ contract MerkleProofX {
     mapping(bytes32 => MerkleTreeInfo) public merkleTrees;
     mapping(address => bool) public isKosVerified;
 
-
     // Events
     event MerkleTreeAdded(bytes32 indexed root, string description, uint256 listSize, address creator, uint256 feePaid);
     event MerkleTreeRemoved(bytes32 indexed root, address remover);
@@ -57,11 +56,7 @@ contract MerkleProofX {
     /**
      * @dev Adds a new Merkle root to the contract
      */
-    function addMerkleTree(
-        bytes32 _root,
-        string memory _description,
-        uint256 _listSize
-    ) external payable {
+    function addMerkleTree(bytes32 _root, string memory _description, uint256 _listSize) external payable {
         require(_root != bytes32(0), "Merkle root cannot be zero");
         require(!merkleTrees[_root].isActive, "Tree already exists");
         require(_listSize > 0, "List size must be greater than 0");
@@ -74,7 +69,7 @@ contract MerkleProofX {
         } else {
             // Non-newcomers must pay fee
             require(msg.value >= platformFee, "Insufficient fee");
-            (bool success, ) = platformTreasury.call{value: msg.value}("");
+            (bool success, ) = platformTreasury.call{ value: msg.value }("");
             require(success, "Fee transfer failed");
             emit FeeCollected(msg.sender, msg.value);
         }
@@ -121,23 +116,22 @@ contract MerkleProofX {
 
     /**
      * @dev Verifies a kOS signed proof for a claimer
-     */ 
+     */
     function submitVerifiedProof(address _claimer, bytes memory _signature) external returns (bool) {
-    require(trustedVerifier != address(0), "Trusted verifier not set");
+        require(trustedVerifier != address(0), "Trusted verifier not set");
 
-    bytes32 messageHash = keccak256(abi.encodePacked(_claimer));
-    bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+        bytes32 messageHash = keccak256(abi.encodePacked(_claimer));
+        bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
 
-    address recoveredSigner = recoverSigner(ethSignedMessageHash, _signature);
-    bool isValid = recoveredSigner == trustedVerifier;
+        address recoveredSigner = recoverSigner(ethSignedMessageHash, _signature);
+        bool isValid = recoveredSigner == trustedVerifier;
 
-    if (isValid) {
-        isKosVerified[_claimer] = true;
+        if (isValid) {
+            isKosVerified[_claimer] = true;
+        }
+
+        return isValid;
     }
-
-    return isValid;
-}
-
 
     /**
      * @dev Removes a Merkle tree from the contract
@@ -153,10 +147,7 @@ contract MerkleProofX {
     /**
      * @dev Updates a Merkle tree's description
      */
-    function updateMerkleTreeDescription(
-        bytes32 _root,
-        string memory _newDescription
-    ) external {
+    function updateMerkleTreeDescription(bytes32 _root, string memory _newDescription) external {
         require(merkleTrees[_root].isActive, "Tree does not exist");
         require(merkleTrees[_root].creator == msg.sender, "Only creator can update");
         require(bytes(_newDescription).length > 0, "Description cannot be empty");
@@ -168,9 +159,7 @@ contract MerkleProofX {
     /**
      * @dev Gets information about a Merkle tree
      */
-    function getMerkleTreeInfo(
-        bytes32 _root
-    ) external view returns (MerkleTreeInfo memory) {
+    function getMerkleTreeInfo(bytes32 _root) external view returns (MerkleTreeInfo memory) {
         require(merkleTrees[_root].isActive, "Tree does not exist");
         return merkleTrees[_root];
     }

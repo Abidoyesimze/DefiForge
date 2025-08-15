@@ -42,13 +42,13 @@ describe("MerkleProofValidator", function () {
 
   // Helper function to generate Merkle tree
   function generateMerkleTree(addresses: string[]) {
-    const { MerkleTree } = require('merkletreejs');
-    const keccak256 = require('keccak256');
-    
+    const { MerkleTree } = require("merkletreejs");
+    const keccak256 = require("keccak256");
+
     const leaves = addresses.map(addr => keccak256(addr));
     const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
     const proofs = addresses.map(addr => tree.getHexProof(keccak256(addr)));
-    
+
     return { tree, proofs };
   }
 
@@ -61,64 +61,62 @@ describe("MerkleProofValidator", function () {
   describe("Merkle Root Registration", function () {
     it("Should register a new Merkle root successfully", async function () {
       const description = "Test whitelist for NFT mint";
-      
+
       const tx = await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, description);
       const receipt = await tx.wait();
-      
-      const event = receipt?.logs.find(
-        (log: any) => log.fragment?.name === "MerkleRootRegistered"
-      );
-      
+
+      const event = receipt?.logs.find((log: any) => log.fragment?.name === "MerkleRootRegistered");
+
       expect(event).to.not.be.undefined;
-      
+
       if (event) {
-        const parsedEvent = merkleValidator.interface.parseLog(event as any);
-        if (parsedEvent) {
-          expect(parsedEvent.args[0]).to.equal(merkleRoot);
-          expect(parsedEvent.args[1]).to.equal(description);
-          expect(parsedEvent.args[2]).to.equal(user1Address);
-        }
+        const parsedEvent = merkleValidator.interface.parseLog(event as any)!;
+        const registeredRoot = parsedEvent.args[0];
+        const registeredDescription = parsedEvent.args[1];
+        const creator = parsedEvent.args[2];
+
+        expect(registeredRoot).to.equal(merkleRoot);
+        expect(registeredDescription).to.equal(description);
+        expect(creator).to.equal(user1Address);
       }
     });
 
     it("Should fail when registering duplicate Merkle root", async function () {
       const description = "Test whitelist";
-      
+
       // Register first time
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, description);
-      
+
       // Try to register again
       await expect(
-        merkleValidator.connect(user2).registerMerkleRoot(merkleRoot, "Another description")
+        merkleValidator.connect(user2).registerMerkleRoot(merkleRoot, "Another description"),
       ).to.be.revertedWith("Merkle root already registered");
     });
 
     it("Should fail when registering zero address as root", async function () {
       const zeroRoot = ethers.ZeroHash;
       const description = "Test description";
-      
-      await expect(
-        merkleValidator.connect(user1).registerMerkleRoot(zeroRoot, description)
-      ).to.not.be.reverted; // This should work as it's a valid hash
+
+      await expect(merkleValidator.connect(user1).registerMerkleRoot(zeroRoot, description)).to.not.be.reverted; // This should work as it's a valid hash
     });
 
     it("Should allow different users to register different roots", async function () {
       const description1 = "First whitelist";
       const description2 = "Second whitelist";
-      
+
       // Generate different Merkle tree
       const differentAddresses = [user1Address, user2Address].map(addr => addr.toLowerCase());
       const { tree: tree2 } = generateMerkleTree(differentAddresses);
       const differentRoot = tree2.getHexRoot();
-      
+
       // Register both roots
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, description1);
       await merkleValidator.connect(user2).registerMerkleRoot(differentRoot, description2);
-      
+
       // Both should be registered
       const stats1 = await merkleValidator.getValidationStats(merkleRoot);
       const stats2 = await merkleValidator.getValidationStats(differentRoot);
-      
+
       expect(stats1.description).to.equal(description1);
       expect(stats2.description).to.equal(description2);
     });
@@ -134,23 +132,19 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       const tx = await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
       const receipt = await tx.wait();
-      
-      const event = receipt?.logs.find(
-        (log: any) => log.fragment?.name === "ProofValidated"
-      );
-      
+
+      const event = receipt?.logs.find((log: any) => log.fragment?.name === "ProofValidated");
+
       expect(event).to.not.be.undefined;
-      
+
       if (event) {
-        const parsedEvent = merkleValidator.interface.parseLog(event as any);
-        if (parsedEvent) {
-          expect(parsedEvent.args[0]).to.equal(merkleRoot);
-          expect(parsedEvent.args[1]).to.equal(user1Address);
-          expect(parsedEvent.args[2]).to.be.true;
-        }
+        const parsedEvent = merkleValidator.interface.parseLog(event as any)!;
+        expect(parsedEvent.args[0]).to.equal(merkleRoot);
+        expect(parsedEvent.args[1]).to.equal(user1Address);
+        expect(parsedEvent.args[2]).to.be.true;
       }
     });
 
@@ -158,7 +152,7 @@ describe("MerkleProofValidator", function () {
       const userAddress = user2Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       // Use the view function to check validation without state changes
       const isValid = await merkleValidator.validateProofView(merkleRoot, proof, leaf);
       expect(isValid).to.be.true;
@@ -168,7 +162,7 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const wrongProof = ["0x" + "1".repeat(64), "0x" + "2".repeat(64)];
       const leaf = ethers.keccak256(userAddress);
-      
+
       // Use the view function to check validation without state changes
       const isValid = await merkleValidator.validateProofView(merkleRoot, wrongProof, leaf);
       expect(isValid).to.be.false;
@@ -179,35 +173,35 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
-      await expect(
-        merkleValidator.connect(user1).validateProof(unregisteredRoot, proof, leaf)
-      ).to.be.revertedWith("Merkle root not registered or inactive");
+
+      await expect(merkleValidator.connect(user1).validateProof(unregisteredRoot, proof, leaf)).to.be.revertedWith(
+        "Merkle root not registered or inactive",
+      );
     });
 
     it("Should fail validation for inactive Merkle root", async function () {
       // Deactivate the root
       await merkleValidator.connect(user1).setMerkleRootStatus(merkleRoot, false);
-      
+
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
-      await expect(
-        merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf)
-      ).to.be.revertedWith("Merkle root not registered or inactive");
+
+      await expect(merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf)).to.be.revertedWith(
+        "Merkle root not registered or inactive",
+      );
     });
 
     it("Should update validation count after successful validation", async function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       const initialStats = await merkleValidator.getValidationStats(merkleRoot);
       expect(initialStats.validationCount).to.equal(0);
-      
+
       await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
-      
+
       const updatedStats = await merkleValidator.getValidationStats(merkleRoot);
       expect(updatedStats.validationCount).to.equal(1);
     });
@@ -222,10 +216,10 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       const isValid = await merkleValidator.validateProofView(merkleRoot, proof, leaf);
       expect(isValid).to.be.true;
-      
+
       // Validation count should not change
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.validationCount).to.equal(0);
@@ -234,7 +228,7 @@ describe("MerkleProofValidator", function () {
     it("Should generate correct leaf from address", async function () {
       const userAddress = user1Address.toLowerCase();
       const expectedLeaf = ethers.keccak256(userAddress);
-      
+
       const generatedLeaf = await merkleValidator.getLeaf(userAddress);
       expect(generatedLeaf).to.equal(expectedLeaf);
     });
@@ -242,10 +236,10 @@ describe("MerkleProofValidator", function () {
     it("Should handle different address formats", async function () {
       const address1 = user1Address.toLowerCase();
       const address2 = user1Address; // Mixed case
-      
+
       const leaf1 = await merkleValidator.getLeaf(address1);
       const leaf2 = await merkleValidator.getLeaf(address2);
-      
+
       expect(leaf1).to.equal(leaf2);
     });
   });
@@ -257,31 +251,31 @@ describe("MerkleProofValidator", function () {
 
     it("Should allow creator to update root status", async function () {
       await merkleValidator.connect(user1).setMerkleRootStatus(merkleRoot, false);
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.isActive).to.be.false;
     });
 
     it("Should allow owner to update any root status", async function () {
       await merkleValidator.connect(owner).setMerkleRootStatus(merkleRoot, false);
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.isActive).to.be.false;
     });
 
     it("Should fail when non-creator non-owner tries to update status", async function () {
-      await expect(
-        merkleValidator.connect(user2).setMerkleRootStatus(merkleRoot, false)
-      ).to.be.revertedWith("Only creator or owner can update status");
+      await expect(merkleValidator.connect(user2).setMerkleRootStatus(merkleRoot, false)).to.be.revertedWith(
+        "Only creator or owner can update status",
+      );
     });
 
     it("Should reactivate deactivated root", async function () {
       // Deactivate first
       await merkleValidator.connect(user1).setMerkleRootStatus(merkleRoot, false);
-      
+
       // Reactivate
       await merkleValidator.connect(user1).setMerkleRootStatus(merkleRoot, true);
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.isActive).to.be.true;
     });
@@ -294,7 +288,7 @@ describe("MerkleProofValidator", function () {
 
     it("Should return correct validation statistics", async function () {
       const stats = await merkleValidator.getValidationStats(merkleRoot);
-      
+
       expect(stats.description).to.equal("Test whitelist");
       expect(stats.creator).to.equal(user1Address);
       expect(stats.timestamp).to.be.greaterThan(0);
@@ -305,7 +299,7 @@ describe("MerkleProofValidator", function () {
     it("Should return zero values for unregistered root", async function () {
       const unregisteredRoot = "0x" + "4".repeat(64);
       const stats = await merkleValidator.getValidationStats(unregisteredRoot);
-      
+
       expect(stats.description).to.equal("");
       expect(stats.creator).to.equal(ethers.ZeroAddress);
       expect(stats.timestamp).to.equal(0);
@@ -317,11 +311,11 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       // Validate multiple times
       await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
       await merkleValidator.connect(user2).validateProof(merkleRoot, proof, leaf);
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.validationCount).to.equal(2);
     });
@@ -330,22 +324,18 @@ describe("MerkleProofValidator", function () {
   describe("Edge Cases", function () {
     it("Should handle very long descriptions", async function () {
       const longDescription = "A".repeat(1000); // Very long description
-      
-      await expect(
-        merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, longDescription)
-      ).to.not.be.reverted;
-      
+
+      await expect(merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, longDescription)).to.not.be.reverted;
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.description).to.equal(longDescription);
     });
 
     it("Should handle empty description", async function () {
       const emptyDescription = "";
-      
-      await expect(
-        merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, emptyDescription)
-      ).to.not.be.reverted;
-      
+
+      await expect(merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, emptyDescription)).to.not.be.reverted;
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.description).to.equal(emptyDescription);
     });
@@ -354,22 +344,22 @@ describe("MerkleProofValidator", function () {
       // This test verifies the contract can handle reasonable large numbers
       // First register a merkle root
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, "Test whitelist");
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.timestamp).to.be.greaterThan(0);
     });
 
     it("Should handle multiple validations from same user", async function () {
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, "Test whitelist");
-      
+
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       // Same user validates multiple times
       await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
       await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
-      
+
       const stats = await merkleValidator.getValidationStats(merkleRoot);
       expect(stats.validationCount).to.equal(2);
     });
@@ -384,10 +374,10 @@ describe("MerkleProofValidator", function () {
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       const tx = await merkleValidator.connect(user1).validateProof(merkleRoot, proof, leaf);
       const receipt = await tx.wait();
-      
+
       // Proof validation should use reasonable gas
       expect(receipt?.gasUsed).to.be.lessThan(200000);
     });
@@ -395,10 +385,10 @@ describe("MerkleProofValidator", function () {
     it("Should use reasonable gas for root registration", async function () {
       const newRoot = "0x" + "5".repeat(64);
       const description = "New whitelist";
-      
+
       const tx = await merkleValidator.connect(user2).registerMerkleRoot(newRoot, description);
       const receipt = await tx.wait();
-      
+
       // Root registration should use reasonable gas
       expect(receipt?.gasUsed).to.be.lessThan(150000);
     });
@@ -406,7 +396,7 @@ describe("MerkleProofValidator", function () {
     it("Should use reasonable gas for status updates", async function () {
       const tx = await merkleValidator.connect(user1).setMerkleRootStatus(merkleRoot, false);
       const receipt = await tx.wait();
-      
+
       // Status update should use minimal gas
       expect(receipt?.gasUsed).to.be.lessThan(100000);
     });
@@ -415,40 +405,40 @@ describe("MerkleProofValidator", function () {
   describe("Security Features", function () {
     it("Should prevent unauthorized status updates", async function () {
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, "Test whitelist");
-      
+
       // Non-creator, non-owner cannot update status
-      await expect(
-        merkleValidator.connect(user2).setMerkleRootStatus(merkleRoot, false)
-      ).to.be.revertedWith("Only creator or owner can update status");
+      await expect(merkleValidator.connect(user2).setMerkleRootStatus(merkleRoot, false)).to.be.revertedWith(
+        "Only creator or owner can update status",
+      );
     });
 
     it("Should prevent duplicate root registration", async function () {
       const description = "Test whitelist";
-      
+
       // First registration
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, description);
-      
+
       // Second registration should fail
       await expect(
-        merkleValidator.connect(user2).registerMerkleRoot(merkleRoot, "Another description")
+        merkleValidator.connect(user2).registerMerkleRoot(merkleRoot, "Another description"),
       ).to.be.revertedWith("Merkle root already registered");
     });
 
     it("Should validate proof integrity", async function () {
       await merkleValidator.connect(user1).registerMerkleRoot(merkleRoot, "Test whitelist");
-      
+
       const userAddress = user1Address.toLowerCase();
       const proof = merkleProofs.get(userAddress)!;
       const leaf = ethers.keccak256(userAddress);
-      
+
       // Valid proof should work
       const isValid = await merkleValidator.validateProofView(merkleRoot, proof, leaf);
       expect(isValid).to.be.true;
-      
+
       // Invalid proof should fail
       const invalidProof = ["0x" + "1".repeat(64)];
       const isValidInvalid = await merkleValidator.validateProofView(merkleRoot, invalidProof, leaf);
       expect(isValidInvalid).to.be.false;
     });
   });
-}); 
+});

@@ -39,20 +39,20 @@ describe("DeFiUtils", function () {
       const tokenBAmount = ethers.parseEther("2000");
 
       const liquidityTokens = await defiUtils.calculateLiquidityTokens(tokenAAmount, tokenBAmount);
-      
+
       // Expected: sqrt(1000 * 2000) = sqrt(2,000,000) ≈ 1414.21
       const expectedLiquidity = ethers.parseEther("1414.21");
       expect(liquidityTokens).to.be.closeTo(expectedLiquidity, ethers.parseEther("0.01"));
     });
 
     it("Should fail with zero amounts", async function () {
-      await expect(
-        defiUtils.calculateLiquidityTokens(0, ethers.parseEther("1000"))
-      ).to.be.revertedWith("Amounts must be greater than 0");
+      await expect(defiUtils.calculateLiquidityTokens(0, ethers.parseEther("1000"))).to.be.revertedWith(
+        "Amounts must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateLiquidityTokens(ethers.parseEther("1000"), 0)
-      ).to.be.revertedWith("Amounts must be greater than 0");
+      await expect(defiUtils.calculateLiquidityTokens(ethers.parseEther("1000"), 0)).to.be.revertedWith(
+        "Amounts must be greater than 0",
+      );
     });
 
     it("Should handle equal amounts", async function () {
@@ -71,7 +71,7 @@ describe("DeFiUtils", function () {
       const [tokenAAmount, tokenBAmount] = await defiUtils.calculateOptimalAmounts(
         tokenAPrice,
         tokenBPrice,
-        totalValue
+        totalValue,
       );
 
       // Expected: $500 worth of each token
@@ -86,28 +86,24 @@ describe("DeFiUtils", function () {
       const validPrice = ethers.parseEther("1");
       const validValue = ethers.parseEther("1000");
 
-      await expect(
-        defiUtils.calculateOptimalAmounts(0, validPrice, validValue)
-      ).to.be.revertedWith("Prices must be greater than 0");
+      await expect(defiUtils.calculateOptimalAmounts(0, validPrice, validValue)).to.be.revertedWith(
+        "Prices must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateOptimalAmounts(validPrice, 0, validValue)
-      ).to.be.revertedWith("Prices must be greater than 0");
+      await expect(defiUtils.calculateOptimalAmounts(validPrice, 0, validValue)).to.be.revertedWith(
+        "Prices must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateOptimalAmounts(validPrice, validPrice, 0)
-      ).to.be.revertedWith("Total value must be greater than 0");
+      await expect(defiUtils.calculateOptimalAmounts(validPrice, validPrice, 0)).to.be.revertedWith(
+        "Total value must be greater than 0",
+      );
     });
 
     it("Should handle very small amounts", async function () {
       const smallPrice = ethers.parseEther("0.000001");
       const totalValue = ethers.parseEther("1");
 
-      const [tokenAAmount, tokenBAmount] = await defiUtils.calculateOptimalAmounts(
-        smallPrice,
-        smallPrice,
-        totalValue
-      );
+      const [tokenAAmount, tokenBAmount] = await defiUtils.calculateOptimalAmounts(smallPrice, smallPrice, totalValue);
 
       expect(tokenAAmount).to.be.greaterThan(0);
       expect(tokenBAmount).to.be.greaterThan(0);
@@ -144,17 +140,17 @@ describe("DeFiUtils", function () {
       const validRate = ethers.parseEther("0.05");
       const validTime = 365 * 24 * 60 * 60;
 
-      await expect(
-        defiUtils.calculateSimpleYield(0, validRate, validTime)
-      ).to.be.revertedWith("Principal must be greater than 0");
+      await expect(defiUtils.calculateSimpleYield(0, validRate, validTime)).to.be.revertedWith(
+        "Principal must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateSimpleYield(validPrincipal, 0, validTime)
-      ).to.be.revertedWith("Rate must be greater than 0");
+      await expect(defiUtils.calculateSimpleYield(validPrincipal, 0, validTime)).to.be.revertedWith(
+        "Rate must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateSimpleYield(validPrincipal, validRate, 0)
-      ).to.be.revertedWith("Time must be greater than 0");
+      await expect(defiUtils.calculateSimpleYield(validPrincipal, validRate, 0)).to.be.revertedWith(
+        "Time must be greater than 0",
+      );
     });
   });
 
@@ -165,12 +161,7 @@ describe("DeFiUtils", function () {
       const time = 365 * 24 * 60 * 60; // 1 year
       const compoundFrequency = 12; // Monthly compounding
 
-      const yieldAmount = await defiUtils.calculateCompoundYield(
-        principal,
-        rate,
-        time,
-        compoundFrequency
-      );
+      const yieldAmount = await defiUtils.calculateCompoundYield(principal, rate, time, compoundFrequency);
 
       // Expected: 1000 * (1 + 0.10/12)^12 - 1000 ≈ 104.71
       expect(yieldAmount).to.be.greaterThan(ethers.parseEther("104"));
@@ -183,16 +174,11 @@ describe("DeFiUtils", function () {
       const time = 365 * 24 * 60 * 60; // 1 year
       const compoundFrequency = 12; // Monthly compounding (more reasonable)
 
-      const yieldAmount = await defiUtils.calculateCompoundYield(
-        principal,
-        rate,
-        time,
-        compoundFrequency
-      );
+      const yieldAmount = await defiUtils.calculateCompoundYield(principal, rate, time, compoundFrequency);
 
       // Monthly compounding should give some yield
       expect(yieldAmount).to.be.greaterThan(0);
-      
+
       // Compare with simple interest (compound should be higher or equal)
       const simpleYield = await defiUtils.calculateSimpleYield(principal, rate, time);
       expect(yieldAmount).to.be.greaterThanOrEqual(simpleYield);
@@ -204,21 +190,21 @@ describe("DeFiUtils", function () {
       const validTime = 365 * 24 * 60 * 60;
       const validFrequency = 12;
 
-      await expect(
-        defiUtils.calculateCompoundYield(0, validRate, validTime, validFrequency)
-      ).to.be.revertedWith("Principal must be greater than 0");
+      await expect(defiUtils.calculateCompoundYield(0, validRate, validTime, validFrequency)).to.be.revertedWith(
+        "Principal must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateCompoundYield(validPrincipal, 0, validTime, validFrequency)
-      ).to.be.revertedWith("Rate must be greater than 0");
+      await expect(defiUtils.calculateCompoundYield(validPrincipal, 0, validTime, validFrequency)).to.be.revertedWith(
+        "Rate must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateCompoundYield(validPrincipal, validRate, 0, validFrequency)
-      ).to.be.revertedWith("Time must be greater than 0");
+      await expect(defiUtils.calculateCompoundYield(validPrincipal, validRate, 0, validFrequency)).to.be.revertedWith(
+        "Time must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateCompoundYield(validPrincipal, validRate, validTime, 0)
-      ).to.be.revertedWith("Compound frequency must be greater than 0");
+      await expect(defiUtils.calculateCompoundYield(validPrincipal, validRate, validTime, 0)).to.be.revertedWith(
+        "Compound frequency must be greater than 0",
+      );
     });
   });
 
@@ -233,7 +219,7 @@ describe("DeFiUtils", function () {
         initialTokenAAmount,
         initialTokenBAmount,
         currentTokenAPrice,
-        currentTokenBPrice
+        currentTokenBPrice,
       );
 
       // Should have some impermanent loss due to price divergence
@@ -251,7 +237,7 @@ describe("DeFiUtils", function () {
         initialTokenAAmount,
         initialTokenBAmount,
         currentTokenAPrice,
-        currentTokenBPrice
+        currentTokenBPrice,
       );
 
       // No impermanent loss when both prices increase equally
@@ -262,21 +248,21 @@ describe("DeFiUtils", function () {
       const validAmount = ethers.parseEther("1000");
       const validPrice = ethers.parseEther("1");
 
-      await expect(
-        defiUtils.calculateImpermanentLoss(0, validAmount, validPrice, validPrice)
-      ).to.be.revertedWith("Initial amounts must be greater than 0");
+      await expect(defiUtils.calculateImpermanentLoss(0, validAmount, validPrice, validPrice)).to.be.revertedWith(
+        "Initial amounts must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateImpermanentLoss(validAmount, 0, validPrice, validPrice)
-      ).to.be.revertedWith("Initial amounts must be greater than 0");
+      await expect(defiUtils.calculateImpermanentLoss(validAmount, 0, validPrice, validPrice)).to.be.revertedWith(
+        "Initial amounts must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateImpermanentLoss(validAmount, validAmount, 0, validPrice)
-      ).to.be.revertedWith("Current prices must be greater than 0");
+      await expect(defiUtils.calculateImpermanentLoss(validAmount, validAmount, 0, validPrice)).to.be.revertedWith(
+        "Current prices must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateImpermanentLoss(validAmount, validAmount, validPrice, 0)
-      ).to.be.revertedWith("Current prices must be greater than 0");
+      await expect(defiUtils.calculateImpermanentLoss(validAmount, validAmount, validPrice, 0)).to.be.revertedWith(
+        "Current prices must be greater than 0",
+      );
     });
   });
 
@@ -307,13 +293,9 @@ describe("DeFiUtils", function () {
       const validAmount = ethers.parseEther("1000");
       const validFeeRate = ethers.parseEther("0.003");
 
-      await expect(
-        defiUtils.calculateSwapFee(0, validFeeRate)
-      ).to.be.revertedWith("Amount must be greater than 0");
+      await expect(defiUtils.calculateSwapFee(0, validFeeRate)).to.be.revertedWith("Amount must be greater than 0");
 
-      await expect(
-        defiUtils.calculateSwapFee(validAmount, 0)
-      ).to.be.revertedWith("Fee rate must be greater than 0");
+      await expect(defiUtils.calculateSwapFee(validAmount, 0)).to.be.revertedWith("Fee rate must be greater than 0");
     });
   });
 
@@ -323,11 +305,7 @@ describe("DeFiUtils", function () {
       const outputAmount = ethers.parseEther("950");
       const expectedOutput = ethers.parseEther("1000");
 
-      const slippagePercentage = await defiUtils.calculateSlippage(
-        inputAmount,
-        outputAmount,
-        expectedOutput
-      );
+      const slippagePercentage = await defiUtils.calculateSlippage(inputAmount, outputAmount, expectedOutput);
 
       // Expected: (1000 - 950) / 1000 = 0.05 = 5%
       const expectedSlippage = ethers.parseEther("0.05");
@@ -339,11 +317,7 @@ describe("DeFiUtils", function () {
       const outputAmount = ethers.parseEther("1000");
       const expectedOutput = ethers.parseEther("1000");
 
-      const slippagePercentage = await defiUtils.calculateSlippage(
-        inputAmount,
-        outputAmount,
-        expectedOutput
-      );
+      const slippagePercentage = await defiUtils.calculateSlippage(inputAmount, outputAmount, expectedOutput);
 
       expect(slippagePercentage).to.equal(0);
     });
@@ -353,11 +327,7 @@ describe("DeFiUtils", function () {
       const outputAmount = ethers.parseEther("1050");
       const expectedOutput = ethers.parseEther("1000");
 
-      const slippagePercentage = await defiUtils.calculateSlippage(
-        inputAmount,
-        outputAmount,
-        expectedOutput
-      );
+      const slippagePercentage = await defiUtils.calculateSlippage(inputAmount, outputAmount, expectedOutput);
 
       // No slippage when output is better than expected
       expect(slippagePercentage).to.equal(0);
@@ -366,17 +336,17 @@ describe("DeFiUtils", function () {
     it("Should fail with invalid inputs", async function () {
       const validAmount = ethers.parseEther("1000");
 
-      await expect(
-        defiUtils.calculateSlippage(0, validAmount, validAmount)
-      ).to.be.revertedWith("Input amount must be greater than 0");
+      await expect(defiUtils.calculateSlippage(0, validAmount, validAmount)).to.be.revertedWith(
+        "Input amount must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateSlippage(validAmount, 0, validAmount)
-      ).to.be.revertedWith("Output amount must be greater than 0");
+      await expect(defiUtils.calculateSlippage(validAmount, 0, validAmount)).to.be.revertedWith(
+        "Output amount must be greater than 0",
+      );
 
-      await expect(
-        defiUtils.calculateSlippage(validAmount, validAmount, 0)
-      ).to.be.revertedWith("Expected output must be greater than 0");
+      await expect(defiUtils.calculateSlippage(validAmount, validAmount, 0)).to.be.revertedWith(
+        "Expected output must be greater than 0",
+      );
     });
   });
 
@@ -398,12 +368,7 @@ describe("DeFiUtils", function () {
       const compoundFrequency = 365;
 
       // These are view functions, so no gas cost to measure
-      const yieldAmount = await defiUtils.calculateCompoundYield(
-        principal,
-        rate,
-        time,
-        compoundFrequency
-      );
+      const yieldAmount = await defiUtils.calculateCompoundYield(principal, rate, time, compoundFrequency);
       expect(yieldAmount).to.be.greaterThan(0);
     });
   });
@@ -433,9 +398,7 @@ describe("DeFiUtils", function () {
       const smallTime = 1;
 
       // Should not revert with large values
-      await expect(
-        defiUtils.calculateSimpleYield(largePrincipal, smallRate, smallTime)
-      ).to.not.be.reverted;
+      await expect(defiUtils.calculateSimpleYield(largePrincipal, smallRate, smallTime)).to.not.be.reverted;
     });
   });
-}); 
+});

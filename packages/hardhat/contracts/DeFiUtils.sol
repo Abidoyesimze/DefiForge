@@ -11,28 +11,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract DeFiUtils is Ownable {
     using Math for uint256;
-    
+
     // Constants for common calculations
     uint256 public constant PRECISION = 1e18;
     uint256 public constant YEAR_IN_SECONDS = 365 days;
-    
+
     // Events
-    event LiquidityCalculated(
-        uint256 tokenAAmount,
-        uint256 tokenBAmount,
-        uint256 liquidityTokens,
-        uint256 fee
-    );
-    
-    event YieldCalculated(
-        uint256 principal,
-        uint256 rate,
-        uint256 time,
-        uint256 yield
-    );
-    
+    event LiquidityCalculated(uint256 tokenAAmount, uint256 tokenBAmount, uint256 liquidityTokens, uint256 fee);
+
+    event YieldCalculated(uint256 principal, uint256 rate, uint256 time, uint256 yield);
+
     constructor() Ownable(msg.sender) {}
-    
+
     /**
      * @dev Calculate liquidity tokens based on token amounts (Uniswap V2 style)
      * @param tokenAAmount Amount of token A
@@ -44,13 +34,13 @@ contract DeFiUtils is Ownable {
         uint256 tokenBAmount
     ) external pure returns (uint256 liquidityTokens) {
         require(tokenAAmount > 0 && tokenBAmount > 0, "Amounts must be greater than 0");
-        
+
         // Simple geometric mean calculation (Uniswap V2 style)
         liquidityTokens = Math.sqrt(tokenAAmount * tokenBAmount);
-        
+
         return liquidityTokens;
     }
-    
+
     /**
      * @dev Calculate optimal token amounts for equal value
      * @param tokenAPrice Price of token A in USD (with 18 decimals)
@@ -66,16 +56,16 @@ contract DeFiUtils is Ownable {
     ) external pure returns (uint256 tokenAAmount, uint256 tokenBAmount) {
         require(tokenAPrice > 0 && tokenBPrice > 0, "Prices must be greater than 0");
         require(totalValue > 0, "Total value must be greater than 0");
-        
+
         // Calculate amounts for equal value allocation
         uint256 halfValue = totalValue / 2;
-        
+
         tokenAAmount = (halfValue * PRECISION) / tokenAPrice;
         tokenBAmount = (halfValue * PRECISION) / tokenBPrice;
-        
+
         return (tokenAAmount, tokenBAmount);
     }
-    
+
     /**
      * @dev Calculate simple interest yield
      * @param principal Principal amount
@@ -83,21 +73,17 @@ contract DeFiUtils is Ownable {
      * @param time Time period in seconds
      * @return yield Total yield earned
      */
-    function calculateSimpleYield(
-        uint256 principal,
-        uint256 rate,
-        uint256 time
-    ) external pure returns (uint256 yield) {
+    function calculateSimpleYield(uint256 principal, uint256 rate, uint256 time) external pure returns (uint256 yield) {
         require(principal > 0, "Principal must be greater than 0");
         require(rate > 0, "Rate must be greater than 0");
         require(time > 0, "Time must be greater than 0");
-        
+
         // Simple interest formula: I = P * r * t
         yield = (principal * rate * time) / (YEAR_IN_SECONDS * PRECISION);
-        
+
         return yield;
     }
-    
+
     /**
      * @dev Calculate compound interest yield
      * @param principal Principal amount
@@ -116,26 +102,27 @@ contract DeFiUtils is Ownable {
         require(rate > 0, "Rate must be greater than 0");
         require(time > 0, "Time must be greater than 0");
         require(compoundFrequency > 0, "Compound frequency must be greater than 0");
-        
+
         // Compound interest formula: A = P * (1 + r/n)^(n*t)
         uint256 n = compoundFrequency;
         uint256 t = time / YEAR_IN_SECONDS;
-        
+
         // Calculate (1 + r/n)^(n*t)
         uint256 base = PRECISION + (rate / n);
         uint256 exponent = n * t;
-        
+
         // Simple approximation for compound interest
         uint256 compoundMultiplier = PRECISION;
-        for (uint256 i = 0; i < exponent && i < 100; i++) { // Limit iterations
+        for (uint256 i = 0; i < exponent && i < 100; i++) {
+            // Limit iterations
             compoundMultiplier = (compoundMultiplier * base) / PRECISION;
         }
-        
+
         yield = (principal * compoundMultiplier) / PRECISION - principal;
-        
+
         return yield;
     }
-    
+
     /**
      * @dev Calculate impermanent loss for a liquidity position
      * @param initialTokenAAmount Initial amount of token A
@@ -152,40 +139,37 @@ contract DeFiUtils is Ownable {
     ) external pure returns (uint256 lossPercentage) {
         require(initialTokenAAmount > 0 && initialTokenBAmount > 0, "Initial amounts must be greater than 0");
         require(currentTokenAPrice > 0 && currentTokenBPrice > 0, "Current prices must be greater than 0");
-        
+
         // Calculate initial and current values
         uint256 initialValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice);
-        
+
         // Calculate current value if held instead of providing liquidity
         uint256 heldValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice);
-        
+
         // Calculate impermanent loss
         if (heldValue > initialValue) {
             lossPercentage = ((heldValue - initialValue) * PRECISION) / heldValue;
         } else {
             lossPercentage = 0;
         }
-        
+
         return lossPercentage;
     }
-    
+
     /**
      * @dev Calculate swap fee for a given amount
      * @param amount Amount to swap
      * @param feeRate Fee rate (with 18 decimals, e.g., 0.3% = 3e15)
      * @return fee Fee amount
      */
-    function calculateSwapFee(
-        uint256 amount,
-        uint256 feeRate
-    ) external pure returns (uint256 fee) {
+    function calculateSwapFee(uint256 amount, uint256 feeRate) external pure returns (uint256 fee) {
         require(amount > 0, "Amount must be greater than 0");
         require(feeRate > 0, "Fee rate must be greater than 0");
-        
+
         fee = (amount * feeRate) / PRECISION;
         return fee;
     }
-    
+
     /**
      * @dev Calculate slippage impact for a trade
      * @param inputAmount Input amount
@@ -201,13 +185,13 @@ contract DeFiUtils is Ownable {
         require(inputAmount > 0, "Input amount must be greater than 0");
         require(outputAmount > 0, "Output amount must be greater than 0");
         require(expectedOutput > 0, "Expected output must be greater than 0");
-        
+
         if (expectedOutput > outputAmount) {
             slippagePercentage = ((expectedOutput - outputAmount) * PRECISION) / expectedOutput;
         } else {
             slippagePercentage = 0;
         }
-        
+
         return slippagePercentage;
     }
-} 
+}

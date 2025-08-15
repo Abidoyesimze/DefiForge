@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log("🚀 Starting deployment process...");
-  
+
   try {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
@@ -90,7 +90,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
       try {
         console.log("🔎 Verifying contracts on block explorer...");
-        
+
         // Verify ERC20Factory
         await hre.run("verify:verify", {
           address: erc20Factory.address,
@@ -148,4 +148,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ["ERC20Factory", "DeFiUtils", "ContractAnalyzer", "ContractTemplates", "MerkleProofValidator", "MerkleProof"]; 
+func.tags = [
+  "ERC20Factory",
+  "DeFiUtils",
+  "ContractAnalyzer",
+  "ContractTemplates",
+  "MerkleProofValidator",
+  "MerkleProof",
+];

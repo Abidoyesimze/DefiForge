@@ -16,9 +16,9 @@ contract ContractTemplates is Ownable, ReentrancyGuard {
     event StakingContractDeployed(address indexed contractAddress, address indexed owner);
     event VestingContractDeployed(address indexed contractAddress, address indexed beneficiary);
     event MultiSigDeployed(address indexed contractAddress, address[] owners);
-    
+
     constructor() Ownable(msg.sender) {}
-    
+
     /**
      * @dev Deploy a basic staking contract
      * @param stakingToken Address of the token to stake
@@ -34,21 +34,16 @@ contract ContractTemplates is Ownable, ReentrancyGuard {
         require(stakingToken != address(0), "Invalid staking token");
         require(rewardToken != address(0), "Invalid reward token");
         require(rewardRate > 0, "Reward rate must be greater than 0");
-        
+
         // Deploy new staking contract
-        BasicStaking staking = new BasicStaking(
-            stakingToken,
-            rewardToken,
-            rewardRate,
-            msg.sender
-        );
-        
+        BasicStaking staking = new BasicStaking(stakingToken, rewardToken, rewardRate, msg.sender);
+
         contractAddress = address(staking);
         emit StakingContractDeployed(contractAddress, msg.sender);
-        
+
         return contractAddress;
     }
-    
+
     /**
      * @dev Deploy a basic vesting contract
      * @param token Address of the token to vest
@@ -70,22 +65,16 @@ contract ContractTemplates is Ownable, ReentrancyGuard {
         require(totalAmount > 0, "Total amount must be greater than 0");
         require(startTime > block.timestamp, "Start time must be in the future");
         require(duration > 0, "Duration must be greater than 0");
-        
+
         // Deploy new vesting contract
-        BasicVesting vesting = new BasicVesting(
-            token,
-            beneficiary,
-            totalAmount,
-            startTime,
-            duration
-        );
-        
+        BasicVesting vesting = new BasicVesting(token, beneficiary, totalAmount, startTime, duration);
+
         contractAddress = address(vesting);
         emit VestingContractDeployed(contractAddress, beneficiary);
-        
+
         return contractAddress;
     }
-    
+
     /**
      * @dev Deploy a basic multi-signature wallet
      * @param owners Array of owner addresses
@@ -99,16 +88,13 @@ contract ContractTemplates is Ownable, ReentrancyGuard {
         require(owners.length > 0, "Owners array cannot be empty");
         require(requiredSignatures > 0, "Required signatures must be greater than 0");
         require(requiredSignatures <= owners.length, "Required signatures cannot exceed owner count");
-        
+
         // Deploy new multi-sig wallet
-        BasicMultiSig multiSig = new BasicMultiSig(
-            owners,
-            requiredSignatures
-        );
-        
+        BasicMultiSig multiSig = new BasicMultiSig(owners, requiredSignatures);
+
         contractAddress = address(multiSig);
         emit MultiSigDeployed(contractAddress, owners);
-        
+
         return contractAddress;
     }
 }
@@ -124,50 +110,45 @@ contract BasicStaking is ReentrancyGuard, Ownable {
     uint256 public totalStaked;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
-    
+
     mapping(address => uint256) public userStaked;
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
-    
+
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
-    
-    constructor(
-        address _stakingToken,
-        address _rewardToken,
-        uint256 _rewardRate,
-        address _owner
-    ) Ownable(_owner) {
+
+    constructor(address _stakingToken, address _rewardToken, uint256 _rewardRate, address _owner) Ownable(_owner) {
         stakingToken = IERC20(_stakingToken);
         rewardToken = IERC20(_rewardToken);
         rewardRate = _rewardRate;
         lastUpdateTime = block.timestamp;
     }
-    
+
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "Cannot stake 0");
-        
+
         updateReward(msg.sender);
         totalStaked += amount;
         userStaked[msg.sender] += amount;
-        
+
         stakingToken.transferFrom(msg.sender, address(this), amount);
         emit Staked(msg.sender, amount);
     }
-    
+
     function withdraw(uint256 amount) external nonReentrant {
         require(amount > 0, "Cannot withdraw 0");
         require(userStaked[msg.sender] >= amount, "Insufficient staked amount");
-        
+
         updateReward(msg.sender);
         totalStaked -= amount;
         userStaked[msg.sender] -= amount;
-        
+
         stakingToken.transfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
-    
+
     function getReward() external nonReentrant {
         updateReward(msg.sender);
         uint256 reward = rewards[msg.sender];
@@ -177,30 +158,26 @@ contract BasicStaking is ReentrancyGuard, Ownable {
             emit RewardPaid(msg.sender, reward);
         }
     }
-    
+
     function updateReward(address account) internal {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = block.timestamp;
-        
+
         if (account != address(0)) {
             rewards[account] = earned(account);
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
     }
-    
+
     function rewardPerToken() public view returns (uint256) {
         if (totalStaked == 0) {
             return rewardPerTokenStored;
         }
-        return rewardPerTokenStored + (
-            (block.timestamp - lastUpdateTime) * rewardRate * 1e18 / totalStaked
-        );
+        return rewardPerTokenStored + (((block.timestamp - lastUpdateTime) * rewardRate * 1e18) / totalStaked);
     }
-    
+
     function earned(address account) public view returns (uint256) {
-        return (userStaked[account] * (
-            rewardPerToken() - userRewardPerTokenPaid[account]
-        ) / 1e18) + rewards[account];
+        return ((userStaked[account] * (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18) + rewards[account];
     }
 }
 
@@ -215,9 +192,9 @@ contract BasicVesting is Ownable {
     uint256 public startTime;
     uint256 public duration;
     uint256 public released;
-    
+
     event TokensReleased(address indexed beneficiary, uint256 amount);
-    
+
     constructor(
         address _token,
         address _beneficiary,
@@ -231,22 +208,22 @@ contract BasicVesting is Ownable {
         startTime = _startTime;
         duration = _duration;
     }
-    
+
     function release() external {
         require(block.timestamp >= startTime, "Vesting has not started");
-        
+
         uint256 releasable = vestedAmount() - released;
         require(releasable > 0, "No tokens to release");
-        
+
         released += releasable;
         token.transfer(beneficiary, releasable);
         emit TokensReleased(beneficiary, releasable);
     }
-    
+
     function releasableAmount() public view returns (uint256) {
         return vestedAmount() - released;
     }
-    
+
     function vestedAmount() public view returns (uint256) {
         if (block.timestamp < startTime) {
             return 0;
@@ -256,23 +233,20 @@ contract BasicVesting is Ownable {
             return (totalAmount * (block.timestamp - startTime)) / duration;
         }
     }
-    
-    function getVestingInfo() external view returns (
-        address _beneficiary,
-        uint256 _totalAmount,
-        uint256 _startTime,
-        uint256 _duration,
-        uint256 _released,
-        uint256 _vestedAmount
-    ) {
-        return (
-            beneficiary,
-            totalAmount,
-            startTime,
-            duration,
-            released,
-            vestedAmount()
-        );
+
+    function getVestingInfo()
+        external
+        view
+        returns (
+            address _beneficiary,
+            uint256 _totalAmount,
+            uint256 _startTime,
+            uint256 _duration,
+            uint256 _released,
+            uint256 _vestedAmount
+        )
+    {
+        return (beneficiary, totalAmount, startTime, duration, released, vestedAmount());
     }
 }
 
@@ -284,7 +258,7 @@ contract BasicMultiSig is Ownable {
     mapping(address => bool) public isOwner;
     address[] public owners;
     uint256 public requiredSignatures;
-    
+
     struct Transaction {
         address to;
         uint256 value;
@@ -292,109 +266,105 @@ contract BasicMultiSig is Ownable {
         bool executed;
         uint256 numConfirmations;
     }
-    
+
     mapping(uint256 => mapping(address => bool)) public isConfirmed;
     Transaction[] public transactions;
-    
+
     event TransactionSubmitted(uint256 indexed txId, address indexed owner, address to, uint256 value, bytes data);
     event TransactionConfirmed(uint256 indexed txId, address indexed owner);
     event TransactionRevoked(uint256 indexed txId, address indexed owner);
     event TransactionExecuted(uint256 indexed txId, address indexed owner);
-    
+
     modifier onlyMultiSigOwner() {
         require(isOwner[msg.sender], "Not an owner");
         _;
     }
-    
+
     modifier txExists(uint256 _txId) {
         require(_txId < transactions.length, "Transaction does not exist");
         _;
     }
-    
+
     modifier notExecuted(uint256 _txId) {
         require(!transactions[_txId].executed, "Transaction already executed");
         _;
     }
-    
+
     modifier notConfirmed(uint256 _txId) {
         require(!isConfirmed[_txId][msg.sender], "Transaction already confirmed");
         _;
     }
-    
+
     constructor(address[] memory _owners, uint256 _requiredSignatures) Ownable(msg.sender) {
         require(_owners.length > 0, "Owners required");
         require(_requiredSignatures > 0 && _requiredSignatures <= _owners.length, "Invalid required signatures");
-        
+
         for (uint256 i = 0; i < _owners.length; i++) {
             address owner = _owners[i];
             require(owner != address(0), "Invalid owner");
             require(!isOwner[owner], "Owner not unique");
-            
+
             isOwner[owner] = true;
             owners.push(owner);
         }
-        
+
         requiredSignatures = _requiredSignatures;
     }
-    
-    function submitTransaction(address _to, uint256 _value, bytes calldata _data) external onlyMultiSigOwner returns (uint256 txId) {
+
+    function submitTransaction(
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    ) external onlyMultiSigOwner returns (uint256 txId) {
         txId = transactions.length;
-        transactions.push(Transaction({
-            to: _to,
-            value: _value,
-            data: _data,
-            executed: false,
-            numConfirmations: 0
-        }));
-        
+        transactions.push(Transaction({ to: _to, value: _value, data: _data, executed: false, numConfirmations: 0 }));
+
         emit TransactionSubmitted(txId, msg.sender, _to, _value, _data);
     }
-    
-    function confirmTransaction(uint256 _txId) external onlyMultiSigOwner txExists(_txId) notExecuted(_txId) notConfirmed(_txId) {
+
+    function confirmTransaction(
+        uint256 _txId
+    ) external onlyMultiSigOwner txExists(_txId) notExecuted(_txId) notConfirmed(_txId) {
         Transaction storage transaction = transactions[_txId];
         transaction.numConfirmations += 1;
         isConfirmed[_txId][msg.sender] = true;
-        
+
         emit TransactionConfirmed(_txId, msg.sender);
     }
-    
+
     function executeTransaction(uint256 _txId) external onlyMultiSigOwner txExists(_txId) notExecuted(_txId) {
         Transaction storage transaction = transactions[_txId];
         require(transaction.numConfirmations >= requiredSignatures, "Cannot execute transaction");
-        
+
         transaction.executed = true;
-        
-        (bool success, ) = transaction.to.call{value: transaction.value}(transaction.data);
+
+        (bool success, ) = transaction.to.call{ value: transaction.value }(transaction.data);
         require(success, "Transaction execution failed");
-        
+
         emit TransactionExecuted(_txId, msg.sender);
     }
-    
+
     function revokeConfirmation(uint256 _txId) external onlyMultiSigOwner txExists(_txId) notExecuted(_txId) {
         Transaction storage transaction = transactions[_txId];
         require(isConfirmed[_txId][msg.sender], "Transaction already confirmed");
-        
+
         transaction.numConfirmations -= 1;
         isConfirmed[_txId][msg.sender] = false;
-        
+
         emit TransactionRevoked(_txId, msg.sender);
     }
-    
+
     function getOwners() external view returns (address[] memory) {
         return owners;
     }
-    
+
     function getTransactionCount() external view returns (uint256) {
         return transactions.length;
     }
-    
-    function getTransaction(uint256 _txId) external view returns (
-        address to,
-        uint256 value,
-        bytes memory data,
-        bool executed,
-        uint256 numConfirmations
-    ) {
+
+    function getTransaction(
+        uint256 _txId
+    ) external view returns (address to, uint256 value, bytes memory data, bool executed, uint256 numConfirmations) {
         Transaction storage transaction = transactions[_txId];
         return (
             transaction.to,
@@ -404,6 +374,6 @@ contract BasicMultiSig is Ownable {
             transaction.numConfirmations
         );
     }
-    
+
     receive() external payable {}
-} 
+}

@@ -247,7 +247,7 @@ const Home = () => {
             {/* Quick Navigation */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
               {features.map((feature, index) => (
-                <button
+            <button
                   key={index}
                   onClick={() => handleNavigateToFeature(feature.link)}
                   className="group p-3 bg-[#1c2941] hover:bg-[#243a5f] rounded-lg border border-gray-600 hover:border-purple-500 transition-all duration-300 hover:scale-105"
@@ -258,7 +258,7 @@ const Home = () => {
                       {feature.title}
                     </span>
                   </div>
-                </button>
+            </button>
               ))}
             </div>
           </div>
@@ -580,7 +580,7 @@ const Home = () => {
                 Explore Tools
               </span>
             </button>
-          </div>
+            </div>
           
           {/* Additional info */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">

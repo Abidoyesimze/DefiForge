@@ -103,23 +103,33 @@ contract DeFiUtils is Ownable {
         require(time > 0, "Time must be greater than 0");
         require(compoundFrequency > 0, "Compound frequency must be greater than 0");
 
-        // Compound interest formula: A = P * (1 + r/n)^(n*t)
+        // Convert time to years with proper precision
+        uint256 timeInYears = (time * PRECISION) / YEAR_IN_SECONDS;
+        
+        // Calculate compound interest: A = P * (1 + r/n)^(n*t)
         uint256 n = compoundFrequency;
-        uint256 t = time / YEAR_IN_SECONDS;
-
-        // Calculate (1 + r/n)^(n*t)
-        uint256 base = PRECISION + (rate / n);
-        uint256 exponent = n * t;
-
-        // Simple approximation for compound interest
+        uint256 r = rate; // Rate is already in wei format (18 decimals)
+        
+        // Calculate (1 + r/n) with proper precision
+        uint256 base = PRECISION + (r / n);
+        
+        // Calculate (n * t) for the exponent
+        uint256 exponent = (n * timeInYears) / PRECISION;
+        
+        // Limit exponent to prevent excessive gas usage
+        if (exponent > 100) {
+            exponent = 100;
+        }
+        
+        // Calculate (1 + r/n)^(n*t) using iterative multiplication
         uint256 compoundMultiplier = PRECISION;
-        for (uint256 i = 0; i < exponent && i < 100; i++) {
-            // Limit iterations
+        for (uint256 i = 0; i < exponent; i++) {
             compoundMultiplier = (compoundMultiplier * base) / PRECISION;
         }
-
+        
+        // Calculate final yield: P * (1 + r/n)^(n*t) - P
         yield = (principal * compoundMultiplier) / PRECISION - principal;
-
+        
         return yield;
     }
 
@@ -140,19 +150,23 @@ contract DeFiUtils is Ownable {
         require(initialTokenAAmount > 0 && initialTokenBAmount > 0, "Initial amounts must be greater than 0");
         require(currentTokenAPrice > 0 && currentTokenBPrice > 0, "Current prices must be greater than 0");
 
-        // Calculate initial and current values
-        uint256 initialValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice);
-
+        // Calculate initial value when liquidity was provided
+        // We need to assume initial prices were equal (1:1 ratio) for simplicity
+        uint256 initialPrice = PRECISION; // 1.0 in wei format
+        uint256 initialValue = (initialTokenAAmount * initialPrice + initialTokenBAmount * initialPrice);
+        
         // Calculate current value if held instead of providing liquidity
         uint256 heldValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice);
-
+        
         // Calculate impermanent loss
         if (heldValue > initialValue) {
-            lossPercentage = ((heldValue - initialValue) * PRECISION) / heldValue;
-        } else {
+            // Gain scenario - no impermanent loss
             lossPercentage = 0;
+        } else {
+            // Loss scenario - calculate percentage loss
+            lossPercentage = ((initialValue - heldValue) * PRECISION) / initialValue;
         }
-
+        
         return lossPercentage;
     }
 

@@ -1,12 +1,11 @@
-import MerkleProofABI from "../ABI/MerkleProof.json";
-import MerkleVerifierABI from "../ABI/MerkleVerifier.json";
+import { MerkleProofContract } from "../ABI";
 
-export const MerkleProofContract = {
-  abi: MerkleProofABI,
-  address: "0xa6d32B6cf5E5033a0713661B0F966732725eF995",
+export const MerkleProofContractComponent = {
+  abi: MerkleProofContract.abi,
+  address: MerkleProofContract.address,
 };
 
 export const MerkleVerifierContract = {
-  abi: MerkleVerifierABI,
-  address: "0x06F17Da8EDfa33B0E35E495418978443B105bCc7",
+  abi: MerkleProofContract.abi, // Using MerkleProof ABI as fallback
+  address: MerkleProofContract.address, // Using MerkleProof address as fallback
 };

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MerkleProofValidatorABI } from "../../ABI";
-import { CONTRACT_ADDRESSES } from "../../contracts/deployedContracts";
+import { MerkleProofValidatorContract } from "../../ABI";
 import { toast } from "react-toastify";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
@@ -38,11 +37,17 @@ const MerkleValidatorPage = () => {
       return;
     }
 
+    // Basic validation
+    if (!merkleRoot.startsWith("0x") || merkleRoot.length !== 66) {
+      toast.error("Please enter a valid Merkle root (0x + 64 hex characters)");
+      return;
+    }
+
     try {
       setIsValidating(true);
       registerMerkleRoot({
-        address: CONTRACT_ADDRESSES.MerkleProofValidator,
-        abi: MerkleProofValidatorABI.abi,
+        address: MerkleProofValidatorContract.address,
+        abi: MerkleProofValidatorContract.abi,
         functionName: "registerMerkleRoot",
         args: [merkleRoot, description],
       });
@@ -65,14 +70,32 @@ const MerkleValidatorPage = () => {
       return;
     }
 
+    // Basic validation
+    if (!merkleRoot.startsWith("0x") || merkleRoot.length !== 66) {
+      toast.error("Please enter a valid Merkle root");
+      return;
+    }
+
+    if (!leaf.startsWith("0x") || leaf.length !== 66) {
+      toast.error("Please enter a valid leaf hash");
+      return;
+    }
+
     try {
       setIsValidating(true);
       // Convert proof string to array of bytes32
       const proofArray = proof.split(",").map(p => p.trim());
+      
+      // Validate proof format
+      if (proofArray.some(p => !p.startsWith("0x") || p.length !== 66)) {
+        toast.error("Please enter valid proof hashes (0x + 64 hex characters each)");
+        setIsValidating(false);
+        return;
+      }
 
       validateProof({
-        address: CONTRACT_ADDRESSES.MerkleProofValidator,
-        abi: MerkleProofValidatorABI.abi,
+        address: MerkleProofValidatorContract.address,
+        abi: MerkleProofValidatorContract.abi,
         functionName: "validateProof",
         args: [merkleRoot, proofArray, leaf],
       });
@@ -245,6 +268,20 @@ const MerkleValidatorPage = () => {
               </div>
             </div>
 
+            {/* Transaction Status */}
+            {(isRegistering || isValidatingTx) && (
+              <div className="mt-8 max-w-4xl mx-auto">
+                <div className="bg-[#1c2941] p-6 rounded-lg border border-purple-500">
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mr-3"></div>
+                    <span className="text-purple-400">
+                      {isRegistering ? "Registering Merkle root..." : "Validating proof..."} Please wait for confirmation.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Results Section */}
             {(isRegistered || isValidationComplete) && (
               <div className="mt-12 max-w-4xl mx-auto">
@@ -342,7 +379,7 @@ const MerkleValidatorPage = () => {
           <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
             <p className="text-sm text-gray-300 mb-2">Merkle Proof Validator deployed at:</p>
-            <code className="text-purple-400 text-sm break-all">{CONTRACT_ADDRESSES.MerkleProofValidator}</code>
+            <code className="text-purple-400 text-sm break-all">{MerkleProofValidatorContract.address}</code>
           </div>
         </div>
       </div>

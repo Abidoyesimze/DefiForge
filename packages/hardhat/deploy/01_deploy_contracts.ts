@@ -5,13 +5,46 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log("🚀 Starting deployment process...");
 
   try {
-    const { deployer } = await hre.getNamedAccounts();
-    const { deploy } = hre.deployments;
+    const { deployer } = await (hre as any).getNamedAccounts();
+    const { deploy } = (hre as any).deployments;
 
     console.log("Deploying contracts with the account:", deployer);
     console.log("Network:", hre.network.name);
     console.log("Chain ID:", hre.network.config.chainId);
     console.log("Deployer address:", deployer);
+
+    // Check if we're on Somnia testnet and use existing addresses
+    const isSomniaTestnet = hre.network.config.chainId === 50312;
+    
+    if (isSomniaTestnet) {
+      console.log("🌐 Detected Somnia Testnet - checking for existing deployments...");
+      
+      // Use existing deployed addresses from your testing
+      const existingAddresses = {
+        ERC20Factory: "0x4F6D41C9F94FdD64c8D82C4eb71a459075E5Ae57",
+        DeFiUtils: "0x8860C6081E3Dd957d225FEf12d718495EBa75255",
+        ContractAnalyzer: "0xB0170720d8BB751Ed8F7cC071b8D0d9b4e5f501F",
+        ContractTemplates: "0x157f375f0112837CA14c8dAFB9dFe26f83a94634",
+        MerkleProofValidator: "0x6FA75F5dc94A1Cec18a8a113851231c66e2Bb90f",
+        MerkleProof: "0x0f1d9F35bc1631D8C3eB6A2B35A2972bF5061E53"
+      };
+
+      console.log("📋 Using existing deployed addresses:");
+      Object.entries(existingAddresses).forEach(([name, address]) => {
+        console.log(`${name}: ${address}`);
+      });
+
+      // Store these addresses for the deployment system
+      for (const [name, address] of Object.entries(existingAddresses)) {
+        await (hre as any).deployments.save(name, {
+          address: address,
+          abi: [], // We'll load the ABI from artifacts
+        });
+      }
+
+      console.log("✅ Existing addresses loaded successfully!");
+      return;
+    }
 
     // Deploy ERC20Factory
     console.log("📦 Deploying ERC20Factory...");

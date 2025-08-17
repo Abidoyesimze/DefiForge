@@ -29,7 +29,7 @@ export const ContractTemplatesContract = {
 
 export const DeFiUtilsContract = {
   abi: DeFiUtilsABI,
-  address: "0x8860C6081E3Dd957d225FEf12d718495EBa75255"
+  address: "0x875CbF85A375a573645a475Fe9daD9678FA24625"
 }
 
 export const ERC20FactoryContract = {

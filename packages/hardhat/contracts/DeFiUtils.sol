@@ -150,21 +150,29 @@ contract DeFiUtils is Ownable {
         require(initialTokenAAmount > 0 && initialTokenBAmount > 0, "Initial amounts must be greater than 0");
         require(currentTokenAPrice > 0 && currentTokenBPrice > 0, "Current prices must be greater than 0");
 
-        // Calculate initial value when liquidity was provided
-        // We need to assume initial prices were equal (1:1 ratio) for simplicity
-        uint256 initialPrice = PRECISION; // 1.0 in wei format
-        uint256 initialValue = (initialTokenAAmount * initialPrice + initialTokenBAmount * initialPrice);
+        // Calculate impermanent loss using a realistic approach
+        // We'll compare holding tokens vs providing liquidity
         
-        // Calculate current value if held instead of providing liquidity
-        uint256 heldValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice);
+        // Calculate current value of holding tokens (HODL strategy)
+        uint256 heldValue = (initialTokenAAmount * currentTokenAPrice + initialTokenBAmount * currentTokenBPrice) / PRECISION;
         
-        // Calculate impermanent loss
-        if (heldValue > initialValue) {
-            // Gain scenario - no impermanent loss
-            lossPercentage = 0;
+        // Calculate the value if we had provided liquidity (LP strategy)
+        // This is a simplified calculation that shows the difference
+        
+        // For LP, we need to calculate the geometric mean of the current prices
+        // and compare it to the arithmetic mean of the initial amounts
+        uint256 sqrtPriceProduct = Math.sqrt(currentTokenAPrice * currentTokenBPrice);
+        
+        // Calculate LP value based on the geometric mean price
+        uint256 lpValue = (initialTokenAAmount + initialTokenBAmount) * sqrtPriceProduct / PRECISION;
+        
+        // Calculate impermanent loss: (HODL - LP) / HODL
+        if (heldValue > lpValue) {
+            // There is impermanent loss
+            lossPercentage = ((heldValue - lpValue) * PRECISION) / heldValue;
         } else {
-            // Loss scenario - calculate percentage loss
-            lossPercentage = ((initialValue - heldValue) * PRECISION) / initialValue;
+            // No impermanent loss (LP performed better or equal)
+            lossPercentage = 0;
         }
         
         return lossPercentage;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useIsNewcomer,
   useMerkleContract,
@@ -26,6 +26,7 @@ import {
   TrashIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
+import { MerkleProofContract } from "../../ABI";
 
 // Define interface for tree info
 interface TreeInfo {
@@ -44,7 +45,6 @@ const MerkleGenerator = () => {
   const [addresses, setAddresses] = useState<string[]>([]);
   const [inputAddress, setInputAddress] = useState("");
   const [merkleRoot, setMerkleRoot] = useState("");
-
   const [merkleTree, setMerkleTree] = useState<MerkleTree | null>(null);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [proof, setProof] = useState<string[]>([]);
@@ -56,20 +56,43 @@ const MerkleGenerator = () => {
   const [txStatus, setTxStatus] = useState("");
 
   // Contract read hooks
-  const { isValid: merkleRootValid, isLoading: rootCheckLoading } = useMerkleRootValid(merkleRoot);
-  const { fee: platformFee = "0", isLoading: feeLoading } = usePlatformFee();
-  const { isNewcomer: isNewcomerStatus, isLoading: newcomerLoading } = useIsNewcomer();
-  const { treeInfo: treeInfoData, isLoading: treeInfoLoading } = useMerkleTreeInfo(merkleRoot);
+  const {
+    isNewcomer: isNewcomerStatus,
+    isLoading: newcomerLoading,
+    isError: newcomerError,
+  } = useIsNewcomer();
 
-  // Contract write operations
-  const { addMerkleTree, removeMerkleTree, updateTreeDescription, isLoading: isContractLoading } = useMerkleContract();
+  const {
+    addMerkleTree,
+    removeMerkleTree,
+    updateTreeDescription,
+    isLoading: isContractLoading,
+  } = useMerkleContract();
+
+  const {
+    isValid: merkleRootValid,
+    isLoading: rootCheckLoading,
+    isError: rootCheckError,
+  } = useMerkleRootValid(merkleRoot);
+
+  const {
+    treeInfo: treeInfoData,
+    isLoading: treeInfoLoading,
+    isError: treeInfoError,
+  } = useMerkleTreeInfo(merkleRoot);
+
+  const {
+    fee: platformFee,
+    isLoading: feeLoading,
+    isError: feeError,
+  } = usePlatformFee();
 
   // Format tree info
   const formattedTreeInfo = treeInfoData as TreeInfo | null;
 
   // Check if any operation is loading
   const isPageLoading =
-    isLoading || isContractLoading || rootCheckLoading || feeLoading || newcomerLoading || treeInfoLoading || false;
+    isLoading || isContractLoading || rootCheckLoading || feeLoading || newcomerLoading || treeInfoLoading;
 
   const validateAddress = (address: string) => {
     try {
@@ -286,10 +309,15 @@ const MerkleGenerator = () => {
       return;
     }
 
+    if (!addMerkleTree) {
+      toast.error("Contract function not available");
+      return;
+    }
+
     try {
       setTxStatus("pending");
       // Fee calculation - if newcomer, fee is 0
-      const fee = isNewcomerStatus ? 0n : BigInt(platformFee as string);
+      const fee = isNewcomerStatus ? 0n : BigInt(platformFee || "0");
 
       const hash = await addMerkleTree(merkleRoot, treeDescription, addresses.length, fee);
       setTxHash(hash);
@@ -335,6 +363,11 @@ const MerkleGenerator = () => {
       return;
     }
 
+    if (!removeMerkleTree) {
+      toast.error("Contract function not available");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to remove this Merkle tree? This action cannot be undone.")) {
       try {
         setTxStatus("pending");
@@ -373,6 +406,11 @@ const MerkleGenerator = () => {
 
     if (formattedTreeInfo && formattedTreeInfo.creator !== connectedAddress) {
       toast.error("Only the creator can update this Merkle tree's description");
+      return;
+    }
+
+    if (!updateTreeDescription) {
+      toast.error("Contract function not available");
       return;
     }
 
@@ -432,7 +470,7 @@ const MerkleGenerator = () => {
             <h2 className="text-2xl font-bold text-white">DefiForge Merkle Proof Generator</h2>
 
             {/* Wallet Connection */}
-            {/* <div>
+            <div>
               {!isConnected ? (
                 <button
                   onClick={() => {
@@ -459,7 +497,7 @@ const MerkleGenerator = () => {
                   </button>
                 </div>
               )}
-            </div> */}
+            </div>
           </div>
 
           <p className="text-gray-300 mb-4">
@@ -716,7 +754,7 @@ const MerkleGenerator = () => {
                         {/* Update button */}
                         <button
                           onClick={handleUpdateDescription}
-                          disabled={isPageLoading || !merkleRoot || !treeDescription || Boolean(merkleRootValid)}
+                          disabled={isPageLoading || !merkleRoot || !treeDescription || !Boolean(merkleRootValid)}
                           className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           {isContractLoading ? "Processing..." : "Update Description"}
@@ -725,7 +763,7 @@ const MerkleGenerator = () => {
                         {/* Remove button */}
                         <button
                           onClick={handleRemoveMerkleRoot}
-                          disabled={isPageLoading || !merkleRoot || !treeDescription || Boolean(merkleRootValid)}
+                          disabled={isPageLoading || !merkleRoot || !Boolean(merkleRootValid)}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           {isContractLoading ? "Processing..." : "Remove Root"}

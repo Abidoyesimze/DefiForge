@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MerkleProofContract } from "./index";
+import { MerkleProofContract } from "../ABI";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 
 // Define TypeScript interfaces for clarity

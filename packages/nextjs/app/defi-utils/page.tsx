@@ -598,7 +598,7 @@ const DeFiUtilsPage = () => {
         <div className="bg-[#1c2941] rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#2a3b54] shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🧮</div>
+            <div className="text-6xl mb-4"></div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-2">Calculation Complete!</h2>
             <p className="text-xl text-gray-300">
               {currentResult.type} calculation finished successfully
@@ -973,49 +973,6 @@ const DeFiUtilsPage = () => {
             </div>
           </>
         )}
-
-        {/* Contract Info */}
-        <div className="mt-12 text-center">
-          <div className="bg-[#1c2941] p-6 rounded-lg max-w-2xl mx-auto">
-            <h3 className="text-lg font-semibold mb-2">Contract Information</h3>
-            <p className="text-sm text-gray-300 mb-2">DeFi Utils deployed at:</p>
-            <code className="text-purple-400 text-sm break-all">{DeFiUtilsContract.address}</code>
-            
-            {/* Test Contract Button */}
-            <div className="mt-4">
-              <button
-                onClick={testContractConnection}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors mr-2"
-              >
-                🧪 Test Contract Connection
-              </button>
-              <button
-                onClick={testCompoundYield}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors mr-2"
-              >
-                🧪 Test Compound Yield
-              </button>
-              <button
-                onClick={testSimpleYield}
-                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm rounded-lg transition-colors mr-2"
-              >
-                🧪 Test Simple Yield
-              </button>
-              <button
-                onClick={testImpermanentLoss}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors mr-2"
-              >
-                🧪 Test Impermanent Loss
-              </button>
-              <button
-                onClick={testSwapFee}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors"
-              >
-                🧪 Test Swap Fee
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       <ResultsModal />
     </div>

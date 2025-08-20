@@ -667,7 +667,8 @@ const DeFiUtilsPage = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
-            <p className="text-gray-300 mb-6">Please connect your wallet to Somnia testnet to use DeFi utilities.</p>
+            <p className="text-gray-300 mb-6">Please connect your wallet to any EVM-compatible network to use DeFi utilities.</p>
+            <p className="text-xs text-gray-400">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
           </div>
         ) : (
           <>

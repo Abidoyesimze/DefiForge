@@ -6,7 +6,7 @@ import { getAlchemyHttpUrl } from "~~/utils/scaffold-eth";
 
 const { targetNetworks } = scaffoldConfig;
 
-// Use only the target networks (Somnia testnet)
+// Use only the target networks (EVM-compatible)
 export const enabledChains = targetNetworks;
 
 export const wagmiConfig = createConfig({

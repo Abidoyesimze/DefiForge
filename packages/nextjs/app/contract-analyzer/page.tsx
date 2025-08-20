@@ -49,7 +49,7 @@ const ContractAnalyzerPage = () => {
         isContract: analysis.isContract,
         hasFallback: analysis.hasFallback,
         hasReceive: analysis.hasReceive,
-        balance: `${Number(analysis.balance) / 1e18} STT`,
+        balance: `${Number(analysis.balance) / 1e18} ETH`,
         codeSize: `${Number(analysis.codeSize).toLocaleString()} bytes`,
         gasOptimization: Number(analysis.estimatedDeploymentGas) < 1000000 ? "Good" : "Needs optimization",
         securityScore: analysis.hasFallback && analysis.hasReceive ? "High" : "Medium",
@@ -150,7 +150,7 @@ const ContractAnalyzerPage = () => {
       
       if (error instanceof Error) {
         if (error.message.includes("insufficient funds")) {
-          errorMessage = "Insufficient STT tokens for gas fees";
+          errorMessage = "Insufficient funds for gas fees";
         } else if (error.message.includes("user rejected")) {
           errorMessage = "Transaction rejected by user";
         } else if (error.message.includes("execution reverted")) {
@@ -176,7 +176,7 @@ const ContractAnalyzerPage = () => {
 
   // Sample contract addresses for quick testing
   const sampleAddresses = [
-    { name: "ERC20 Factory", address: ERC20FactoryContract.address },
+    { name: "Token Factory", address: ERC20FactoryContract.address },
     { name: "DeFi Utils", address: DeFiUtilsContract.address },
     { name: "Contract Analyzer", address: ContractAnalyzerContract.address },
   ];
@@ -208,7 +208,8 @@ const ContractAnalyzerPage = () => {
     if (!showResultsModal || !formattedResult) return null;
 
     const getExplorerLink = (address: string, txHash: string) => {
-      const baseExplorerUrl = "https://explorer.somnia.network"; // Update with actual Somnia explorer
+      // Use a generic explorer or detect from network
+      const baseExplorerUrl = "https://etherscan.io"; // Default to Etherscan
       return {
         contract: `${baseExplorerUrl}/address/${address}`,
         transaction: `${baseExplorerUrl}/tx/${txHash}`
@@ -408,7 +409,8 @@ const ContractAnalyzerPage = () => {
           <div className="text-center p-8 bg-[#1c2941] rounded-xl border border-[#2a3b54]">
             <div className="text-4xl mb-4">🔒</div>
             <h2 className="text-xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-gray-300">Please connect your wallet to Somnia testnet to analyze contracts.</p>
+            <p className="text-gray-300">Please connect your wallet to any EVM-compatible network to analyze contracts.</p>
+            <p className="text-xs text-gray-400 mt-2">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
           </div>
         ) : (
           <>

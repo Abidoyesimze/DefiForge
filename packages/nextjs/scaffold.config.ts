@@ -11,15 +11,34 @@ export type ScaffoldConfig = {
 
 export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
+// Define ETN testnet chain
+const etnTestnet = {
+  id: 5201420,
+  name: "ETN Testnet",
+  network: "etn-testnet",
+  nativeCurrency: {
+    name: "ETN Test Token",
+    symbol: "ETN",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: { http: ["https://rpc.ankr.com/electroneum_testnet"] },
+    public: { http: ["https://rpc.ankr.com/electroneum_testnet"] },
+  },
+  blockExplorers: {
+    default: { name: "ETN Explorer", url: "https://testnet-explorer.electroneum.com/" },
+  },
+} as const;
+
 // Define Somnia testnet chain
 const somniaTestnet = {
   id: 50312,
   name: "Somnia Testnet",
   network: "somnia-testnet",
   nativeCurrency: {
-    decimals: 18,
     name: "Somnia Test Token",
     symbol: "STT",
+    decimals: 18,
   },
   rpcUrls: {
     default: { http: ["https://dream-rpc.somnia.network/"] },
@@ -32,21 +51,17 @@ const somniaTestnet = {
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [somniaTestnet],
+  targetNetworks: [etnTestnet, somniaTestnet],
 
   // The interval at which your front-end polls the RPC servers for new data
-  // it has no effect if you only target the local network (default is 4000)
   pollingInterval: 30000,
 
-  // This is ours Alchemy's default API key.
-  // You can get your own at https://dashboard.alchemyapi.io
-  // It's recommended to store it in an env variable:
-  // .env.local for local testing, and in the Vercel/system env config for live apps.
+  // This is the Alchemy API key that we provide to you for free. You can get your own at https://www.alchemy.com/
   alchemyApiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || DEFAULT_ALCHEMY_API_KEY,
 
-  // If you want to use a different RPC for a specific network, you can add it here.
-  // The key is the chain ID, and the value is the HTTP RPC URL
+  // Override RPC URLs for specific networks
   rpcOverrides: {
+    [etnTestnet.id]: "https://rpc.ankr.com/electroneum_testnet",
     [somniaTestnet.id]: "https://dream-rpc.somnia.network/",
   },
 

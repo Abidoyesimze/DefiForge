@@ -31,12 +31,33 @@ const ContractTemplatesPage = () => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployedContracts, setDeployedContracts] = useState<string[]>([]);
   const [showDeploymentModal, setShowDeploymentModal] = useState(false);
+  const [networkInfo, setNetworkInfo] = useState<{ chainId: string; name: string } | null>(null);
 
   const { writeContract: deployTemplate, data: deployData } = useWriteContract();
 
   const { isLoading: isDeployingTx, isSuccess: isDeployed } = useWaitForTransactionReceipt({
     hash: deployData,
   });
+
+  // Get network info when wallet connects
+  useEffect(() => {
+    const getNetworkInfo = async () => {
+      if (isConnected && window.ethereum) {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const network = await provider.getNetwork();
+          setNetworkInfo({
+            chainId: network.chainId.toString(),
+            name: network.name || "Unknown"
+          });
+        } catch (error) {
+          console.error("Error getting network info:", error);
+        }
+      }
+    };
+
+    getNetworkInfo();
+  }, [isConnected]);
 
   // Enhanced templates with more details
   const templates: Template[] = [
@@ -451,9 +472,8 @@ const ContractTemplatesPage = () => {
           <div className="text-center p-8 bg-[#1c2941] rounded-xl border border-[#2a3b54]">
             <div className="text-4xl mb-4">🔒</div>
             <h2 className="text-xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-gray-300">
-              Please connect your wallet to Somnia testnet to deploy contract templates.
-            </p>
+            <p className="text-gray-300">Please connect your wallet to any EVM-compatible network to deploy contract templates.</p>
+            <p className="text-xs text-gray-400 mt-2">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
           </div>
         ) : (
           <>
@@ -537,8 +557,11 @@ const ContractTemplatesPage = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-2 text-white">Network</h3>
-                  <div className="text-emerald-400 font-semibold">Somnia Testnet</div>
-                  <div className="text-gray-400 text-sm">Chain ID: 50312</div>
+                  <div className="text-emerald-400 font-semibold">EVM-Compatible Network</div>
+                  <div className="text-gray-400 text-sm">Chain ID: {networkInfo?.chainId || "..."}</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Supported: ETN (5201420), Somnia (50312)
+                  </div>
                 </div>
               </div>
             </div>

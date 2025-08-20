@@ -31,13 +31,13 @@ import {
 
 const features = [
   {
-    title: "ERC20 Factory",
+    title: "Token Factory",
     description:
-      "Create custom ERC20 tokens with ease. Deploy tokens with custom names, symbols, and initial supplies.",
+      "Create custom ERC20, ERC721, and ERC1155 tokens with ease. Deploy tokens with custom names, symbols, and configurations.",
     icon: CurrencyDollarIcon,
-    link: "/erc20-factory",
+    link: "/token-factory",
     color: "from-purple-500 to-pink-500",
-    stats: "Instant Deployment",
+    stats: "Multi-Token Support",
     badge: "Popular",
   },
   {
@@ -90,9 +90,9 @@ const features = [
 const useCases = [
   {
     title: "Token Creation",
-    description: "Launch your own ERC20 tokens with custom parameters and initial distribution.",
+    description: "Launch your own ERC20, ERC721, and ERC1155 tokens with custom parameters and configurations.",
     icon: "🪙",
-    examples: ["Custom Tokens", "Token Sales", "Reward Systems"],
+    examples: ["Custom Tokens", "NFT Collections", "Multi-Token Contracts"],
   },
   {
     title: "DeFi Development",
@@ -216,14 +216,14 @@ const Home = () => {
             {/* Network Badge */}
             <div className="mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full text-sm font-medium">
-                <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-                Live on Somnia Testnet • Chain ID: 50312
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                Live on EVM-Compatible Network
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
-                onClick={() => handleNavigateToFeature("/erc20-factory")}
+                onClick={() => handleNavigateToFeature("/token-factory")}
                 className={`group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-2xl ${
                   isButtonLoading ? "opacity-75 cursor-wait" : ""
                 }`}
@@ -269,11 +269,14 @@ const Home = () => {
         <div className="py-12 bg-[#1c2941] rounded-lg border border-gray-600">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-4 text-white">
-              🌐 Built on <span className="text-purple-400">Somnia Testnet</span>
+              🌐 Built on <span className="text-purple-400">EVM-Compatible Networks</span>
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              DefiForge is deployed on Somnia Network&apos;s testnet, providing a fast, secure, and cost-effective
+              DefiForge is designed to work on any EVM-compatible blockchain, providing a fast, secure, and cost-effective
               environment for DeFi development and testing.
+            </p>
+            <p className="text-sm text-gray-400 mt-2">
+              Currently supporting: <strong>ETN Testnet</strong> (Chain ID: 5201420) and <strong>Somnia Testnet</strong> (Chain ID: 50312)
             </p>
           </div>
 
@@ -295,15 +298,15 @@ const Home = () => {
             </div>
             <div className="text-center p-4">
               <div className="text-2xl mb-2">🌍</div>
-              <h3 className="font-semibold text-white mb-1">Testnet Ready</h3>
-              <p className="text-sm text-gray-400">Free STT tokens available</p>
+              <h3 className="font-semibold text-white mb-1">Multi-Chain Ready</h3>
+              <p className="text-sm text-gray-400">Deploy on any EVM network</p>
             </div>
           </div>
 
           <div className="mt-8 text-center">
             <div className="inline-flex items-center px-4 py-2 bg-[#0f1a2e] rounded-lg border border-gray-600">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm text-gray-300">Chain ID: 50312 • RPC: dream-rpc.somnia.network</span>
+              <span className="text-sm text-gray-300">Multi-Chain Ready • EVM Compatible • ETN & Somnia Testnets</span>
             </div>
           </div>
         </div>
@@ -377,7 +380,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-white">Production Ready</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  All contracts are deployed on Somnia testnet and ready for production use. Built with OpenZeppelin
+                  All contracts are deployed and ready for production use. Built with OpenZeppelin
                   standards and best practices.
                 </p>
               </div>
@@ -512,7 +515,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: "1", title: "Connect Wallet", desc: "Connect your wallet to Somnia testnet", icon: "🔗" },
+              { step: "1", title: "Connect Wallet", desc: "Connect your wallet to ETN or Somnia testnet", icon: "🔗" },
               { step: "2", title: "Choose Feature", desc: "Select the DeFi tool you need", icon: "🛠️" },
               { step: "3", title: "Interact", desc: "Use the tool with your parameters", icon: "⚡" },
               { step: "4", title: "Deploy", desc: "Deploy or use the generated results", icon: "🚀" },
@@ -551,7 +554,7 @@ const Home = () => {
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <button
-              onClick={() => handleNavigateToFeature("/erc20-factory")}
+              onClick={() => handleNavigateToFeature("/token-factory")}
               className={`group relative px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-2xl ${
                 isButtonLoading ? "opacity-75 cursor-wait" : ""
               }`}

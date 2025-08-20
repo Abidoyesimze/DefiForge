@@ -21,7 +21,7 @@ export const Header = () => {
     if (
       (pathname === "/merkle-proof-generator" ||
         pathname === "/merkle-validator" ||
-        pathname === "/erc20-factory" ||
+        pathname === "/token-factory" ||
         pathname === "/defi-utils" ||
         pathname === "/contract-analyzer" ||
         pathname === "/contract-templates") &&
@@ -79,11 +79,11 @@ export const Header = () => {
         <ul className="menu menu-horizontal px-1 gap-2">
           <li>
             <button
-              className={`px-4 py-2 rounded-lg text-sm transition-colors text-left ${isActive("/erc20-factory")} ${!isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
-              onClick={e => handleProtectedNavigation(e, "/erc20-factory")}
+              className={`px-4 py-2 rounded-lg text-sm transition-colors text-left ${isActive("/token-factory")} ${!isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+              onClick={e => handleProtectedNavigation(e, "/token-factory")}
               disabled={!isConnected}
             >
-              ERC20 Factory
+              Token Factory
             </button>
           </li>
           <li>
@@ -140,8 +140,8 @@ export const Header = () => {
           <div tabIndex={0} role="button" className="btn btn-ghost btn-sm text-white">
             {pathname === "/"
               ? "Select Feature"
-              : pathname === "/erc20-factory"
-                ? "ERC20 Factory"
+              : pathname === "/token-factory"
+                ? "Token Factory"
                 : pathname === "/defi-utils"
                   ? "DeFi Utils"
                   : pathname === "/contract-analyzer"
@@ -152,7 +152,7 @@ export const Header = () => {
                         ? "Merkle Validator"
                         : pathname === "/merkle-proof-generator"
                           ? "Proof Generator"
-                  : "Menu"}
+                        : "Menu"}
             <svg className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -160,11 +160,11 @@ export const Header = () => {
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-[#1c2941] rounded-box w-52 mt-1">
             <li className={!isConnected ? "disabled opacity-50" : ""}>
               <button
-                className={`${pathname === "/erc20-factory" ? "bg-purple-900/40 text-white" : "text-gray-200"}`}
-                onClick={e => handleProtectedNavigation(e, "/erc20-factory")}
+                className={`${pathname === "/token-factory" ? "bg-purple-900/40 text-white" : "text-gray-200"}`}
+                onClick={e => handleProtectedNavigation(e, "/token-factory")}
                 disabled={!isConnected}
               >
-                ERC20 Factory
+                Token Factory
               </button>
             </li>
             <li className={!isConnected ? "disabled opacity-50" : ""}>

@@ -23,6 +23,9 @@ const providerApiKey = process.env.ALCHEMY_API_KEY || "oKxs-03sij-U_N0iOlrSsZFr2
 const deployerPrivateKey = process.env.__RUNTIME_DEPLOYER_PRIVATE_KEY;
 // Somnia testnet private key - use your actual private key from .env
 const somniaPrivateKey = process.env.SOMNIA_PRIVATE_KEY;
+
+// ETN testnet private key - use your actual private key from .env
+const etnPrivateKey = process.env.ETN_PRIVATE_KEY;
 // If not set, it uses our block explorers default API keys.
 const etherscanApiKey = process.env.ETHERSCAN_MAINNET_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 const etherscanOptimisticApiKey = process.env.ETHERSCAN_OPTIMISTIC_API_KEY || "RM62RDISS1RH448ZY379NX625ASG1N633R";
@@ -142,6 +145,13 @@ const config: HardhatUserConfig = {
         chainId: 50312,
       },
     }),
+    ...(etnPrivateKey && {
+      etn: {
+        url: "https://rpc.ankr.com/electroneum_testnet",
+        accounts: [etnPrivateKey],
+        chainId: 5201420,
+      },
+    }),
   },
   // Configuration for harhdat-verify plugin
   etherscan: {
@@ -153,6 +163,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://shannon-explorer.somnia.network/api",
           browserURL: "https://shannon-explorer.somnia.network/",
+        },
+      },
+      {
+        network: "etn",
+        chainId: 5201420,
+        urls: {
+          apiURL: "https://testnet-explorer.electroneum.com/api",
+          browserURL: "https://testnet-explorer.electroneum.com/",
         },
       },
     ],

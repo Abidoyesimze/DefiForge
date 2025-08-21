@@ -154,4 +154,4 @@ DefiForge makes it possible for anyone to create professional-grade DeFi applica
 
 *Built with ❤️ for the DeFi community*
 
-*Visit [DefiForge Platform]([[https://defiforge.com](https://defi-forge-nextjs-9w5e.vercel.app/)](https://defi-forge-nextjs-9w5e.vercel.app/)) to get started*
+*Visit [DefiForge Platform](https://defi-forge-nextjs-9w5e.vercel.app/)) to get started*

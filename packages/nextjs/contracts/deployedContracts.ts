@@ -3,12 +3,12 @@
  * These contracts were deployed to Chain ID: 50312
  */
 import {
-  ERC20FactoryABI,
-  DeFiUtilsABI,
   ContractAnalyzerABI,
   ContractTemplatesABI,
-  MerkleProofValidatorABI,
+  DeFiUtilsABI,
+  ERC20FactoryABI,
   MerkleProofABI,
+  MerkleProofValidatorABI,
 } from "../ABI";
 
 // Contract addresses for easy access
@@ -23,12 +23,12 @@ export const CONTRACT_ADDRESSES = {
 
 // Contract ABIs for easy access
 export const CONTRACT_ABIS = {
-  ERC20Factory: ERC20FactoryABI.abi,
-  DeFiUtils: DeFiUtilsABI.abi,
-  ContractAnalyzer: ContractAnalyzerABI.abi,
-  ContractTemplates: ContractTemplatesABI.abi,
-  MerkleProofValidator: MerkleProofValidatorABI.abi,
-  MerkleProof: MerkleProofABI.abi,
+  ERC20Factory: ERC20FactoryABI,
+  DeFiUtils: DeFiUtilsABI,
+  ContractAnalyzer: ContractAnalyzerABI,
+  ContractTemplates: ContractTemplatesABI,
+  MerkleProofValidator: MerkleProofValidatorABI,
+  MerkleProof: MerkleProofABI,
 } as const;
 
 // Network information

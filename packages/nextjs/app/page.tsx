@@ -248,7 +248,7 @@ const Home = () => {
             {/* Quick Navigation */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
               {features.map((feature, index) => (
-            <button
+                <button
                   key={index}
                   onClick={() => handleNavigateToFeature(feature.link)}
                   className="group p-3 bg-[#1c2941] hover:bg-[#243a5f] rounded-lg border border-gray-600 hover:border-purple-500 transition-all duration-300 hover:scale-105"
@@ -259,7 +259,7 @@ const Home = () => {
                       {feature.title}
                     </span>
                   </div>
-            </button>
+                </button>
               ))}
             </div>
           </div>
@@ -272,11 +272,12 @@ const Home = () => {
               🌐 Built on <span className="text-purple-400">EVM-Compatible Networks</span>
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              DefiForge is designed to work on any EVM-compatible blockchain, providing a fast, secure, and cost-effective
-              environment for DeFi development and testing.
+              DefiForge is designed to work on any EVM-compatible blockchain, providing a fast, secure, and
+              cost-effective environment for DeFi development and testing.
             </p>
             <p className="text-sm text-gray-400 mt-2">
-              Currently supporting: <strong>ETN Testnet</strong> (Chain ID: 5201420) and <strong>Somnia Testnet</strong> (Chain ID: 50312)
+              Currently supporting: <strong>ETN Testnet</strong> (Chain ID: 5201420) and <strong>Somnia Testnet</strong>{" "}
+              (Chain ID: 50312)
             </p>
           </div>
 
@@ -380,8 +381,8 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-white">Production Ready</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  All contracts are deployed and ready for production use. Built with OpenZeppelin
-                  standards and best practices.
+                  All contracts are deployed and ready for production use. Built with OpenZeppelin standards and best
+                  practices.
                 </p>
               </div>
             </div>
@@ -575,7 +576,7 @@ const Home = () => {
                 Explore Tools
               </span>
             </button>
-            </div>
+          </div>
 
           {/* Additional info */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">

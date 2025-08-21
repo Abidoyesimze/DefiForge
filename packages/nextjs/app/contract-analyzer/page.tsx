@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ContractAnalyzerContract, ERC20FactoryContract, DeFiUtilsContract } from "../../ABI";
+import React, { useEffect, useState } from "react";
+import { ContractAnalyzerContract, DeFiUtilsContract, ERC20FactoryContract } from "../../ABI";
+import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount, useReadContract } from "wagmi";
-import { ethers } from "ethers";
 
 // Define types for better type safety
 interface AnalysisResult {
@@ -32,7 +32,7 @@ const ContractAnalyzerPage = () => {
   const [contractAddress, setContractAddress] = useState("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
+
   // Success modal state
   const [showResultsModal, setShowResultsModal] = useState(false);
 
@@ -42,9 +42,9 @@ const ContractAnalyzerPage = () => {
 
     try {
       const analysis = analysisData.analysis;
-      
+
       return {
-        contractSize: `${Math.round((Number(analysis.contractSize)) * 100) / 100} KB`,
+        contractSize: `${Math.round(Number(analysis.contractSize) * 100) / 100} KB`,
         estimatedDeploymentGas: Number(analysis.estimatedDeploymentGas).toLocaleString(),
         isContract: analysis.isContract,
         hasFallback: analysis.hasFallback,
@@ -54,7 +54,7 @@ const ContractAnalyzerPage = () => {
         gasOptimization: Number(analysis.estimatedDeploymentGas) < 1000000 ? "Good" : "Needs optimization",
         securityScore: analysis.hasFallback && analysis.hasReceive ? "High" : "Medium",
         analyzedAddress: analysisData.contractAddress,
-        txHash: analysisData.txHash
+        txHash: analysisData.txHash,
       };
     } catch (error) {
       return null;
@@ -86,33 +86,29 @@ const ContractAnalyzerPage = () => {
       // Use ethers.js directly (same fix as Token Factory)
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        ContractAnalyzerContract.address,
-        ContractAnalyzerContract.abi,
-        signer
-      );
+      const contract = new ethers.Contract(ContractAnalyzerContract.address, ContractAnalyzerContract.abi, signer);
 
       // Estimate gas properly
       const gasEstimate = await contract.analyzeContract.estimateGas(contractAddress);
-      
+
       // Execute with proper gas limit (add 50% buffer)
       const gasLimit = (gasEstimate * BigInt(150)) / BigInt(100);
-      
+
       const tx = await contract.analyzeContract(contractAddress, {
         gasLimit: gasLimit,
-        gasPrice: ethers.parseUnits("6", "gwei")
+        gasPrice: ethers.parseUnits("6", "gwei"),
       });
 
       toast.info(`Transaction sent: ${tx.hash.slice(0, 10)}...`);
 
       // Wait for confirmation
       const receipt = await tx.wait();
-      
+
       // Parse the ContractAnalyzed event to get analysis results
       const contractAnalyzedEvent = receipt.logs.find((log: any) => {
         try {
           const parsed = contract.interface.parseLog(log);
-          return parsed?.name === 'ContractAnalyzed';
+          return parsed?.name === "ContractAnalyzed";
         } catch {
           return false;
         }
@@ -123,14 +119,14 @@ const ContractAnalyzerPage = () => {
           const parsed = contract.interface.parseLog(contractAnalyzedEvent);
           if (parsed?.args?.analysis) {
             const analysis = parsed.args.analysis;
-            
+
             // Set the analysis result from the event
             setAnalysisResult({
               contractAddress: contractAddress,
               analysis: analysis,
-              txHash: tx.hash
+              txHash: tx.hash,
             });
-            
+
             // Show results modal
             setShowResultsModal(true);
             toast.success("Contract analysis completed!");
@@ -144,10 +140,9 @@ const ContractAnalyzerPage = () => {
       } else {
         toast.warning("Analysis completed, but no results found in transaction");
       }
-
     } catch (error: unknown) {
       let errorMessage = "Failed to analyze contract";
-      
+
       if (error instanceof Error) {
         if (error.message.includes("insufficient funds")) {
           errorMessage = "Insufficient funds for gas fees";
@@ -164,10 +159,10 @@ const ContractAnalyzerPage = () => {
         } else {
           errorMessage = error.message;
         }
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsAnalyzing(false);
@@ -212,7 +207,7 @@ const ContractAnalyzerPage = () => {
       const baseExplorerUrl = "https://etherscan.io"; // Default to Etherscan
       return {
         contract: `${baseExplorerUrl}/address/${address}`,
-        transaction: `${baseExplorerUrl}/tx/${txHash}`
+        transaction: `${baseExplorerUrl}/tx/${txHash}`,
       };
     };
 
@@ -225,9 +220,7 @@ const ContractAnalyzerPage = () => {
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">📊</div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-2">Analysis Complete!</h2>
-            <p className="text-xl text-gray-300">
-              Contract analysis finished successfully
-            </p>
+            <p className="text-xl text-gray-300">Contract analysis finished successfully</p>
           </div>
 
           {/* Contract Address Display */}
@@ -265,7 +258,9 @@ const ContractAnalyzerPage = () => {
             {/* Contract Status */}
             <div className="bg-[#0f1a2e] p-6 rounded-xl border border-[#1e2a3a]">
               <div className="flex items-center mb-3">
-                <div className={`w-4 h-4 rounded-full mr-3 ${formattedResult.isContract ? "bg-emerald-500" : "bg-red-500"}`}></div>
+                <div
+                  className={`w-4 h-4 rounded-full mr-3 ${formattedResult.isContract ? "bg-emerald-500" : "bg-red-500"}`}
+                ></div>
                 <span className="text-gray-400 text-sm">Contract Status</span>
               </div>
               <div className="text-white font-bold text-lg">
@@ -287,7 +282,9 @@ const ContractAnalyzerPage = () => {
             <div className="bg-[#0f1a2e] p-6 rounded-xl border border-[#1e2a3a]">
               <div className="text-gray-400 text-sm mb-3">Deploy Gas</div>
               <div className="text-white font-bold text-lg">{formattedResult.estimatedDeploymentGas}</div>
-              <div className={`text-xs mt-1 ${formattedResult.gasOptimization === "Good" ? "text-emerald-400" : "text-amber-400"}`}>
+              <div
+                className={`text-xs mt-1 ${formattedResult.gasOptimization === "Good" ? "text-emerald-400" : "text-amber-400"}`}
+              >
                 {formattedResult.gasOptimization}
               </div>
             </div>
@@ -305,15 +302,21 @@ const ContractAnalyzerPage = () => {
             <h3 className="text-lg font-semibold mb-4 text-emerald-400">Security Features</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 ${formattedResult.hasFallback ? "bg-emerald-500" : "bg-gray-500"}`}></div>
+                <div
+                  className={`w-4 h-4 rounded-full mr-3 ${formattedResult.hasFallback ? "bg-emerald-500" : "bg-gray-500"}`}
+                ></div>
                 <div>
                   <div className="text-white font-medium">Fallback Function</div>
-                  <div className="text-gray-400 text-sm">{formattedResult.hasFallback ? "Present" : "Not detected"}</div>
+                  <div className="text-gray-400 text-sm">
+                    {formattedResult.hasFallback ? "Present" : "Not detected"}
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 ${formattedResult.hasReceive ? "bg-emerald-500" : "bg-gray-500"}`}></div>
+                <div
+                  className={`w-4 h-4 rounded-full mr-3 ${formattedResult.hasReceive ? "bg-emerald-500" : "bg-gray-500"}`}
+                ></div>
                 <div>
                   <div className="text-white font-medium">Receive Function</div>
                   <div className="text-gray-400 text-sm">{formattedResult.hasReceive ? "Present" : "Not detected"}</div>
@@ -321,10 +324,14 @@ const ContractAnalyzerPage = () => {
               </div>
 
               <div className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 ${formattedResult.securityScore === "High" ? "bg-emerald-500" : "bg-amber-500"}`}></div>
+                <div
+                  className={`w-4 h-4 rounded-full mr-3 ${formattedResult.securityScore === "High" ? "bg-emerald-500" : "bg-amber-500"}`}
+                ></div>
                 <div>
                   <div className="text-white font-medium">Security Score</div>
-                  <div className={`text-sm ${formattedResult.securityScore === "High" ? "text-emerald-400" : "text-amber-400"}`}>
+                  <div
+                    className={`text-sm ${formattedResult.securityScore === "High" ? "text-emerald-400" : "text-amber-400"}`}
+                  >
                     {formattedResult.securityScore} Risk
                   </div>
                 </div>
@@ -337,14 +344,27 @@ const ContractAnalyzerPage = () => {
             <h3 className="text-lg font-semibold mb-4 text-amber-400">Analysis Summary</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
               <div className="space-y-2">
-                <div>• <strong>Contract Type:</strong> {formattedResult.isContract ? "Smart Contract" : "EOA/Invalid"}</div>
-                <div>• <strong>Size Optimization:</strong> {formattedResult.gasOptimization === "Good" ? "Well optimized" : "Could be improved"}</div>
-                <div>• <strong>Security Level:</strong> {formattedResult.securityScore} risk assessment</div>
+                <div>
+                  • <strong>Contract Type:</strong> {formattedResult.isContract ? "Smart Contract" : "EOA/Invalid"}
+                </div>
+                <div>
+                  • <strong>Size Optimization:</strong>{" "}
+                  {formattedResult.gasOptimization === "Good" ? "Well optimized" : "Could be improved"}
+                </div>
+                <div>
+                  • <strong>Security Level:</strong> {formattedResult.securityScore} risk assessment
+                </div>
               </div>
               <div className="space-y-2">
-                <div>• <strong>Deploy Cost:</strong> ~{formattedResult.estimatedDeploymentGas} gas units</div>
-                <div>• <strong>Current Balance:</strong> {formattedResult.balance}</div>
-                <div>• <strong>Code Size:</strong> {formattedResult.contractSize} total</div>
+                <div>
+                  • <strong>Deploy Cost:</strong> ~{formattedResult.estimatedDeploymentGas} gas units
+                </div>
+                <div>
+                  • <strong>Current Balance:</strong> {formattedResult.balance}
+                </div>
+                <div>
+                  • <strong>Code Size:</strong> {formattedResult.contractSize} total
+                </div>
               </div>
             </div>
           </div>
@@ -409,8 +429,12 @@ const ContractAnalyzerPage = () => {
           <div className="text-center p-8 bg-[#1c2941] rounded-xl border border-[#2a3b54]">
             <div className="text-4xl mb-4">🔒</div>
             <h2 className="text-xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-gray-300">Please connect your wallet to any EVM-compatible network to analyze contracts.</p>
-            <p className="text-xs text-gray-400 mt-2">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+            <p className="text-gray-300">
+              Please connect your wallet to any EVM-compatible network to analyze contracts.
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+            </p>
           </div>
         ) : (
           <>
@@ -485,7 +509,9 @@ const ContractAnalyzerPage = () => {
                 <div className="bg-gradient-to-r from-emerald-900/20 to-slate-900/20 p-6 rounded-xl border border-emerald-500/30">
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500 mr-3"></div>
-                    <span className="text-emerald-400 font-medium">Analyzing contract... Please wait for confirmation.</span>
+                    <span className="text-emerald-400 font-medium">
+                      Analyzing contract... Please wait for confirmation.
+                    </span>
                   </div>
                 </div>
               </div>
@@ -508,15 +534,15 @@ const ContractAnalyzerPage = () => {
                   <div className="text-center p-6 bg-[#0f1a2e] rounded-lg border border-[#1e2a3a]">
                     <p className="text-gray-300 mb-4">Analysis completed for:</p>
                     <code className="text-emerald-400 text-sm break-all">{formattedResult.analyzedAddress}</code>
-                    <p className="text-gray-400 text-sm mt-2">Click "View Detailed Results" to see the full analysis</p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      Click &quot;View Detailed Results&quot; to see the full analysis
+                    </p>
                   </div>
                 </div>
               </div>
             )}
           </>
         )}
-
-        
       </div>
 
       {/* Results Modal */}

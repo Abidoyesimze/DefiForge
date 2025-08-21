@@ -85,7 +85,7 @@ const MerkleValidatorPage = () => {
       setIsValidating(true);
       // Convert proof string to array of bytes32
       const proofArray = proof.split(",").map(p => p.trim());
-      
+
       // Validate proof format
       if (proofArray.some(p => !p.startsWith("0x") || p.length !== 66)) {
         toast.error("Please enter valid proof hashes (0x + 64 hex characters each)");
@@ -134,7 +134,9 @@ const MerkleValidatorPage = () => {
             <p className="text-gray-300 mb-6">
               Please connect your wallet to any EVM-compatible network to use the Merkle validator.
             </p>
-            <p className="text-xs text-gray-400">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+            <p className="text-xs text-gray-400">
+              Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+            </p>
           </div>
         ) : (
           <>
@@ -276,7 +278,8 @@ const MerkleValidatorPage = () => {
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mr-3"></div>
                     <span className="text-purple-400">
-                      {isRegistering ? "Registering Merkle root..." : "Validating proof..."} Please wait for confirmation.
+                      {isRegistering ? "Registering Merkle root..." : "Validating proof..."} Please wait for
+                      confirmation.
                     </span>
                   </div>
                 </div>

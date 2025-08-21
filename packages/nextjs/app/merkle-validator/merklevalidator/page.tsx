@@ -1,6 +1,6 @@
 "use client";
 
-import MerkleValidator from "../../components/MerkleProofValidator";
+import MerkleValidator from "../../../components/MerkleProofValidator";
 
 const MerkleValidatorPage = () => {
   return <MerkleValidator />;

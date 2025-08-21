@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { ERC20FactoryABI, ERC721FactoryABI, ERC1155FactoryABI } from "../../ABI";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
-import { 
-  ERC20FactoryABI, 
-  ERC721FactoryABI, 
-  ERC1155FactoryABI 
-} from "../../ABI";
 
 type TokenType = "erc20" | "erc721" | "erc1155";
 
@@ -37,7 +33,7 @@ const TokenFactoryPage = () => {
           const network = await provider.getNetwork();
           setNetworkInfo({
             chainId: network.chainId.toString(),
-            name: network.name || "Unknown"
+            name: network.name || "Unknown",
           });
         } catch (error) {
           console.error("Error checking network:", error);
@@ -65,7 +61,7 @@ const TokenFactoryPage = () => {
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -111,7 +107,7 @@ const TokenFactoryPage = () => {
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      
+
       const signer = await provider.getSigner();
 
       let deployedAddress: string = ""; // Initialize deployedAddress
@@ -121,27 +117,24 @@ const TokenFactoryPage = () => {
           const erc20Contract = new ethers.Contract(
             "0x4F6D41C9F94FdD64c8D82C4eb71a459075E5Ae57", // ERC20Factory address
             ERC20FactoryABI,
-            signer
+            signer,
           );
 
           // Use parseUnits with explicit decimals to avoid ENS resolution
-          const initialSupplyWei = ethers.parseUnits(
-            formData.initialSupply,
-            formData.decimals
-          );
+          const initialSupplyWei = ethers.parseUnits(formData.initialSupply, formData.decimals);
 
           const erc20Tx = await erc20Contract.createToken(
             formData.name,
             formData.symbol,
             initialSupplyWei,
-            formData.decimals
+            formData.decimals,
           );
 
           const erc20Receipt = await erc20Tx.wait();
           const erc20Event = erc20Receipt.logs.find((log: any) => {
             try {
               const parsed = erc20Contract.interface.parseLog(log);
-              return parsed?.name === 'TokenCreated';
+              return parsed?.name === "TokenCreated";
             } catch {
               return false;
             }
@@ -157,7 +150,7 @@ const TokenFactoryPage = () => {
           const erc721Contract = new ethers.Contract(
             "0x915C81F20f8A6fFe4A19342B2C54Bf0840C37B9A", // ERC721Factory address
             ERC721FactoryABI,
-            signer
+            signer,
           );
 
           const maxSupply = formData.maxSupply ? parseInt(formData.maxSupply) : 0;
@@ -169,14 +162,14 @@ const TokenFactoryPage = () => {
             maxSupply,
             formData.mintable,
             formData.burnable,
-            formData.pausable
+            formData.pausable,
           );
 
           const erc721Receipt = await erc721Tx.wait();
           const erc721Event = erc721Receipt.logs.find((log: any) => {
             try {
               const parsed = erc721Contract.interface.parseLog(log);
-              return parsed?.name === 'CollectionCreated';
+              return parsed?.name === "CollectionCreated";
             } catch {
               return false;
             }
@@ -192,7 +185,7 @@ const TokenFactoryPage = () => {
           const erc1155Contract = new ethers.Contract(
             "0xaA65bf9B2c119Df5043498f0C78D7FC1a6F6F4B4", // ERC1155Factory address
             ERC1155FactoryABI,
-            signer
+            signer,
           );
 
           const erc1155Tx = await erc1155Contract.createMultiToken(
@@ -201,14 +194,14 @@ const TokenFactoryPage = () => {
             formData.mintable,
             formData.burnable,
             formData.pausable,
-            formData.supplyTracked
+            formData.supplyTracked,
           );
 
           const erc1155Receipt = await erc1155Tx.wait();
           const erc1155Event = erc1155Receipt.logs.find((log: any) => {
             try {
               const parsed = erc1155Contract.interface.parseLog(log);
-              return parsed?.name === 'MultiTokenCreated';
+              return parsed?.name === "MultiTokenCreated";
             } catch {
               return false;
             }
@@ -236,34 +229,33 @@ const TokenFactoryPage = () => {
             "Token Symbol": formData.symbol,
             ...(selectedTokenType === "erc20" && {
               "Initial Supply": formData.initialSupply,
-              "Decimals": formData.decimals.toString()
+              Decimals: formData.decimals.toString(),
             }),
             ...(selectedTokenType === "erc721" && {
               "Max Supply": formData.maxSupply || "Unlimited",
-              "Base URI": formData.baseURI
+              "Base URI": formData.baseURI,
             }),
             ...(selectedTokenType === "erc1155" && {
-              "Metadata URI": formData.uri
+              "Metadata URI": formData.uri,
             }),
-            "Mintable": formData.mintable ? "Yes" : "No",
-            "Burnable": formData.burnable ? "Yes" : "No",
-            "Pausable": formData.pausable ? "Yes" : "No",
+            Mintable: formData.mintable ? "Yes" : "No",
+            Burnable: formData.burnable ? "Yes" : "No",
+            Pausable: formData.pausable ? "Yes" : "No",
             ...(selectedTokenType === "erc1155" && {
-              "Supply Tracked": formData.supplyTracked ? "Yes" : "No"
-            })
-          }
+              "Supply Tracked": formData.supplyTracked ? "Yes" : "No",
+            }),
+          },
         };
 
         setDeploymentResult(result);
         setShowSuccessModal(true);
-        
+
         toast.success(`${selectedTokenType.toUpperCase()} token deployed successfully!`);
       }
-
     } catch (error: any) {
       console.error("Deployment error:", error);
       let errorMessage = "Failed to deploy token";
-      
+
       if (error.message.includes("user rejected")) {
         errorMessage = "Transaction rejected by user";
       } else if (error.message.includes("insufficient funds")) {
@@ -273,7 +265,7 @@ const TokenFactoryPage = () => {
       } else if (error.message.includes("ENS") || error.message.includes("UNSUPPORTED_OPERATION")) {
         errorMessage = "Network configuration error. Please ensure you're connected to an EVM-compatible network.";
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsDeploying(false);
@@ -291,9 +283,7 @@ const TokenFactoryPage = () => {
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-2">Token Deployed Successfully!</h2>
-            <p className="text-xl text-gray-300">
-              Your {deploymentResult.type} token has been created
-            </p>
+            <p className="text-xl text-gray-300">Your {deploymentResult.type} token has been created</p>
           </div>
 
           {/* Token Info Display */}
@@ -345,9 +335,7 @@ const TokenFactoryPage = () => {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-slate-400 bg-clip-text text-transparent">
             Token Factory
           </h1>
-          <p className="text-xl text-gray-300">
-            Deploy ERC20, ERC721, and ERC1155 tokens with custom configurations
-          </p>
+          <p className="text-xl text-gray-300">Deploy ERC20, ERC721, and ERC1155 tokens with custom configurations</p>
         </div>
 
         {/* Wallet Connection Check */}
@@ -373,7 +361,9 @@ const TokenFactoryPage = () => {
                 </div>
                 <div className="mt-3 text-sm text-green-300">
                   <p>Connected to an EVM-compatible network. You can now deploy tokens!</p>
-                  <p className="mt-1 text-xs text-gray-400">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+                  </p>
                 </div>
               </div>
             </div>
@@ -381,12 +371,12 @@ const TokenFactoryPage = () => {
             <div className="max-w-4xl mx-auto">
               <div className="bg-[#1c2941] p-8 rounded-xl border border-[#2a3b54] shadow-xl">
                 <h2 className="text-2xl font-bold mb-6">Create New Token</h2>
-                
+
                 {/* Token Type Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-300 mb-3">Token Type</label>
                   <div className="grid grid-cols-3 gap-3">
-                    {(["erc20", "erc721", "erc1155"] as TokenType[]).map((type) => (
+                    {(["erc20", "erc721", "erc1155"] as TokenType[]).map(type => (
                       <button
                         key={type}
                         onClick={() => setSelectedTokenType(type)}
@@ -401,32 +391,34 @@ const TokenFactoryPage = () => {
                     ))}
                   </div>
                 </div>
-                
-                <form onSubmit={(e) => { e.preventDefault(); deployToken(); }} className="space-y-6">
+
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    deployToken();
+                  }}
+                  className="space-y-6"
+                >
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Token Name *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Token Name *</label>
                       <input
                         type="text"
                         value={formData.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        onChange={e => handleInputChange("name", e.target.value)}
                         placeholder="My Awesome Token"
                         className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
                         required
                       />
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Token Symbol *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Token Symbol *</label>
                       <input
                         type="text"
                         value={formData.symbol}
-                        onChange={(e) => handleInputChange("symbol", e.target.value)}
+                        onChange={e => handleInputChange("symbol", e.target.value)}
                         placeholder="MAT"
                         className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
                         required
@@ -438,26 +430,22 @@ const TokenFactoryPage = () => {
                   {selectedTokenType === "erc20" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Initial Supply *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Initial Supply *</label>
                         <input
                           type="text"
                           value={formData.initialSupply}
-                          onChange={(e) => handleInputChange("initialSupply", e.target.value)}
+                          onChange={e => handleInputChange("initialSupply", e.target.value)}
                           placeholder="1000000"
                           className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
                           required
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Decimals *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Decimals *</label>
                         <select
                           value={formData.decimals}
-                          onChange={(e) => handleInputChange("decimals", parseInt(e.target.value))}
+                          onChange={e => handleInputChange("decimals", parseInt(e.target.value))}
                           className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white focus:outline-none focus:border-emerald-500 transition-all duration-200"
                         >
                           <option value={18}>18 (Standard)</option>
@@ -477,7 +465,9 @@ const TokenFactoryPage = () => {
                       <input
                         type="text"
                         value={selectedTokenType === "erc721" ? formData.baseURI : formData.uri}
-                        onChange={(e) => handleInputChange(selectedTokenType === "erc721" ? "baseURI" : "uri", e.target.value)}
+                        onChange={e =>
+                          handleInputChange(selectedTokenType === "erc721" ? "baseURI" : "uri", e.target.value)
+                        }
                         placeholder="https://api.example.com/metadata/"
                         className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
                         required
@@ -487,13 +477,11 @@ const TokenFactoryPage = () => {
 
                   {selectedTokenType === "erc721" && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Maximum Supply
-                      </label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Maximum Supply</label>
                       <input
                         type="text"
                         value={formData.maxSupply}
-                        onChange={(e) => handleInputChange("maxSupply", e.target.value)}
+                        onChange={e => handleInputChange("maxSupply", e.target.value)}
                         placeholder="10000 (0 for unlimited)"
                         className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
                       />
@@ -503,33 +491,33 @@ const TokenFactoryPage = () => {
                   {/* Configuration Options */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-emerald-400">Configuration Options</h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={formData.mintable}
-                          onChange={(e) => handleInputChange("mintable", e.target.checked)}
+                          onChange={e => handleInputChange("mintable", e.target.checked)}
                           className="w-4 h-4 text-emerald-600 bg-[#0f1a2e] border-[#2a3b54] rounded focus:ring-emerald-500 focus:ring-2"
                         />
                         <span className="text-sm">Mintable</span>
                       </label>
-                      
+
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={formData.burnable}
-                          onChange={(e) => handleInputChange("burnable", e.target.checked)}
+                          onChange={e => handleInputChange("burnable", e.target.checked)}
                           className="w-4 h-4 text-emerald-600 bg-[#0f1a2e] border-[#2a3b54] rounded focus:ring-emerald-500 focus:ring-2"
                         />
                         <span className="text-sm">Burnable</span>
                       </label>
-                      
+
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={formData.pausable}
-                          onChange={(e) => handleInputChange("pausable", e.target.checked)}
+                          onChange={e => handleInputChange("pausable", e.target.checked)}
                           className="w-4 h-4 text-emerald-600 bg-[#0f1a2e] border-[#2a3b54] rounded focus:ring-emerald-500 focus:ring-2"
                         />
                         <span className="text-sm">Pausable</span>
@@ -541,7 +529,7 @@ const TokenFactoryPage = () => {
                         <input
                           type="checkbox"
                           checked={formData.supplyTracked}
-                          onChange={(e) => handleInputChange("supplyTracked", e.target.checked)}
+                          onChange={e => handleInputChange("supplyTracked", e.target.checked)}
                           className="w-4 h-4 text-emerald-600 bg-[#0f1a2e] border-[#2a3b54] rounded focus:ring-emerald-500 focus:ring-2"
                         />
                         <span className="text-sm">Track Total Supply</span>

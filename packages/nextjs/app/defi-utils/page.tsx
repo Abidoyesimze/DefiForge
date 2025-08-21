@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { DeFiUtilsContract } from "../../ABI";
+import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
-import { ethers } from "ethers";
 
 // Define types for better type safety
 interface CalculationResult {
@@ -49,7 +49,7 @@ const DeFiUtilsPage = () => {
 
     try {
       console.log(`🔄 Converting "${value}" to BigInt with ${decimals} decimals`);
-      
+
       // Handle negative numbers
       const isNegative = value.startsWith("-");
       const absValue = isNegative ? value.slice(1) : value;
@@ -58,7 +58,7 @@ const DeFiUtilsPage = () => {
       const [wholePart, decimalPart = ""] = absValue.split(".");
       const paddedDecimal = decimalPart.padEnd(decimals, "0").slice(0, decimals);
       const fullNumber = wholePart + paddedDecimal;
-      
+
       console.log(`  - Whole part: "${wholePart}"`);
       console.log(`  - Decimal part: "${decimalPart}"`);
       console.log(`  - Padded decimal: "${paddedDecimal}"`);
@@ -71,7 +71,7 @@ const DeFiUtilsPage = () => {
       // Apply negative sign if needed
       const finalResult = isNegative ? -result : result;
       console.log(`  - Final result: ${finalResult.toString()}`);
-      
+
       return finalResult;
     } catch (error) {
       console.error("❌ Error converting to BigInt:", error);
@@ -95,12 +95,8 @@ const DeFiUtilsPage = () => {
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       console.log("✅ Provider created successfully");
-      
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
       console.log("✅ Contract instance created");
       console.log("Contract ABI methods:", Object.keys(contract.interface.fragments));
 
@@ -110,30 +106,29 @@ const DeFiUtilsPage = () => {
       }
 
       console.log("✅ Function exists in ABI, calling contract...");
-      
+
       // Call the contract function directly (view function, no gas needed)
       const result = await contract[functionName](...args);
       console.log("✅ Contract call successful, result:", result);
-      
+
       // Format and display the result
       const formattedResult = formatResult(result, calculationType);
       console.log("✅ Result formatted:", formattedResult);
-      
+
       // Set current result and show modal
       setCurrentResult({
         type: calculationType,
         value: result,
         formatted: formattedResult,
-        inputs: getInputSummary(calculationType)
+        inputs: getInputSummary(calculationType),
       });
-      
+
       setShowResultsModal(true);
       toast.success(`${calculationType} calculation completed!`);
-
     } catch (error: unknown) {
       console.error("❌ Error in performCalculation:", error);
       let errorMessage = `Failed to calculate ${calculationType.toLowerCase()}`;
-      
+
       if (error instanceof Error) {
         if (error.message.includes("execution reverted")) {
           errorMessage = "Invalid calculation parameters";
@@ -144,10 +139,10 @@ const DeFiUtilsPage = () => {
         } else {
           errorMessage = error.message;
         }
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsCalculating(false);
@@ -160,29 +155,29 @@ const DeFiUtilsPage = () => {
       case "Liquidity":
         return {
           "Token 0 Amount": token0Amount,
-          "Token 1 Amount": token1Amount
+          "Token 1 Amount": token1Amount,
         };
       case "Simple Yield":
       case "Compound Yield":
         return {
-          "Principal": principal,
+          Principal: principal,
           "Annual Rate": rate + "%",
-          "Time": time + " years",
+          Time: time + " years",
           ...(calculationType === "Compound Yield" && {
-            "Compound Frequency": getCompoundFrequencyText(compoundFrequency)
-          })
+            "Compound Frequency": getCompoundFrequencyText(compoundFrequency),
+          }),
         };
       case "Impermanent Loss":
         return {
           "Initial Token A Amount": initialTokenAAmount,
           "Initial Token B Amount": initialTokenBAmount,
           "Current Token A Price": currentTokenAPrice,
-          "Current Token B Price": currentTokenBPrice
+          "Current Token B Price": currentTokenBPrice,
         };
       case "Swap Fee":
         return {
           "Amount In": amountIn,
-          "Fee Percentage": feePercentage + "%"
+          "Fee Percentage": feePercentage + "%",
         };
       default:
         return {};
@@ -192,10 +187,10 @@ const DeFiUtilsPage = () => {
   const getCompoundFrequencyText = (freq: string): string => {
     const frequencies: Record<string, string> = {
       "1": "Annually",
-      "2": "Semi-annually", 
+      "2": "Semi-annually",
       "4": "Quarterly",
       "12": "Monthly",
-      "365": "Daily"
+      "365": "Daily",
     };
     return frequencies[freq] || freq;
   };
@@ -232,26 +227,23 @@ const DeFiUtilsPage = () => {
   const calculateLiquidity = async (): Promise<void> => {
     console.log("🔍 Starting liquidity calculation...");
     console.log("Inputs:", { token0Amount, token1Amount });
-    
-    if (
-      !validateInput(token0Amount, "Token 0 Amount") ||
-      !validateInput(token1Amount, "Token 1 Amount")
-    ) {
+
+    if (!validateInput(token0Amount, "Token 0 Amount") || !validateInput(token1Amount, "Token 1 Amount")) {
       console.log("❌ Input validation failed");
       return;
     }
 
     console.log("✅ Input validation passed, calling contract...");
-    
+
     try {
       await performCalculation(
         "calculateLiquidityTokens", // Correct function name from ABI
         [
           convertToBigInt(token0Amount),
-          convertToBigInt(token1Amount)
+          convertToBigInt(token1Amount),
           // Note: This function doesn't take price as parameter
         ],
-        "Liquidity"
+        "Liquidity",
       );
     } catch (error) {
       console.error("❌ Error in calculateLiquidity:", error);
@@ -270,29 +262,21 @@ const DeFiUtilsPage = () => {
 
     console.log("🔍 Simple Yield Calculation Details:");
     console.log("Raw inputs:", { principal, rate, time });
-    
+
     const principalBigInt = convertToBigInt(principal);
     const rateBigInt = convertToBigInt(rate, 18); // Rate in wei format (18 decimals)
     const timeBigInt = BigInt(Math.floor(parseFloat(time) * 365 * 24 * 60 * 60)); // Convert years to seconds
-    
+
     console.log("Converted BigInt values:");
     console.log("- Principal:", principalBigInt.toString(), "wei");
     console.log("- Rate:", rateBigInt.toString(), "wei (rate with 18 decimals)");
     console.log("- Time:", timeBigInt.toString(), "seconds");
-    
+
     console.log("Principal in ETH:", Number(principalBigInt) / 1e18);
     console.log("Rate in %:", Number(rateBigInt) / 1e16);
     console.log("Time in years:", parseFloat(time));
 
-    await performCalculation(
-      "calculateSimpleYield",
-      [
-        principalBigInt,
-        rateBigInt,
-        timeBigInt
-      ],
-      "Simple Yield"
-    );
+    await performCalculation("calculateSimpleYield", [principalBigInt, rateBigInt, timeBigInt], "Simple Yield");
   };
 
   const calculateCompoundYield = async (): Promise<void> => {
@@ -306,35 +290,35 @@ const DeFiUtilsPage = () => {
 
     console.log("🔍 Compound Yield Calculation Details:");
     console.log("Raw inputs:", { principal, rate, time, compoundFrequency });
-    
+
     const principalBigInt = convertToBigInt(principal);
     const rateBigInt = convertToBigInt(rate, 18); // Rate in wei format (18 decimals)
     const timeBigInt = BigInt(Math.floor(parseFloat(time) * 365 * 24 * 60 * 60)); // Convert years to seconds
-    
+
     console.log("Converted BigInt values:");
     console.log("- Principal:", principalBigInt.toString(), "wei");
     console.log("- Rate:", rateBigInt.toString(), "wei (rate with 18 decimals)");
     console.log("- Time:", timeBigInt.toString(), "seconds");
     console.log("- Frequency:", compoundFrequency);
-    
+
     console.log("Principal in ETH:", Number(principalBigInt) / 1e18);
     console.log("Rate in %:", Number(rateBigInt) / 1e16);
     console.log("Time in years:", parseFloat(time));
 
     await performCalculation(
       "calculateCompoundYield",
-      [
-        principalBigInt,
-        rateBigInt,
-        timeBigInt,
-        parseInt(compoundFrequency)
-      ],
-      "Compound Yield"
+      [principalBigInt, rateBigInt, timeBigInt, parseInt(compoundFrequency)],
+      "Compound Yield",
     );
   };
 
   const calculateImpermanentLoss = async (): Promise<void> => {
-    if (!validateInput(initialTokenAAmount, "Initial Token A Amount") || !validateInput(initialTokenBAmount, "Initial Token B Amount") || !validateInput(currentTokenAPrice, "Current Token A Price") || !validateInput(currentTokenBPrice, "Current Token B Price")) {
+    if (
+      !validateInput(initialTokenAAmount, "Initial Token A Amount") ||
+      !validateInput(initialTokenBAmount, "Initial Token B Amount") ||
+      !validateInput(currentTokenAPrice, "Current Token A Price") ||
+      !validateInput(currentTokenBPrice, "Current Token B Price")
+    ) {
       return;
     }
 
@@ -344,9 +328,9 @@ const DeFiUtilsPage = () => {
         convertToBigInt(initialTokenAAmount, 18), // Price in wei
         convertToBigInt(initialTokenBAmount, 18), // Price in wei
         convertToBigInt(currentTokenAPrice, 18), // Price in wei
-        convertToBigInt(currentTokenBPrice, 18) // Price in wei
+        convertToBigInt(currentTokenBPrice, 18), // Price in wei
       ],
-      "Impermanent Loss"
+      "Impermanent Loss",
     );
   };
 
@@ -357,34 +341,27 @@ const DeFiUtilsPage = () => {
 
     console.log("🔍 Swap Fee Calculation Details:");
     console.log("Raw inputs:", { amountIn, feePercentage });
-    
+
     const amountBigInt = convertToBigInt(amountIn);
     // Convert percentage to wei format: 0.3% = 0.003 = 3e15
     const feeRateBigInt = BigInt(Math.floor(parseFloat(feePercentage) * 1e15)); // 0.3% = 3000000000000000
-    
+
     console.log("Converted BigInt values:");
     console.log("- Amount:", amountBigInt.toString(), "wei");
     console.log("- Fee Rate:", feeRateBigInt.toString(), "wei (fee rate with 18 decimals)");
-    
+
     console.log("Amount in ETH:", Number(amountBigInt) / 1e18);
     console.log("Fee Rate in %:", parseFloat(feePercentage));
     console.log("Fee Rate in wei:", Number(feeRateBigInt) / 1e18);
 
-    await performCalculation(
-      "calculateSwapFee",
-      [
-        amountBigInt,
-        feeRateBigInt
-      ],
-      "Swap Fee"
-    );
+    await performCalculation("calculateSwapFee", [amountBigInt, feeRateBigInt], "Swap Fee");
   };
 
   const formatResult = (value: bigint, type: string): string => {
     if (!value) return "0";
-    
+
     const numValue = Number(value) / 1e18;
-    
+
     switch (type) {
       case "Impermanent Loss":
         return `${numValue.toFixed(4)}%`;
@@ -409,7 +386,7 @@ const DeFiUtilsPage = () => {
   // Test contract connection
   const testContractConnection = async (): Promise<void> => {
     console.log("🧪 Testing contract connection...");
-    
+
     try {
       if (!window.ethereum) {
         toast.error("MetaMask not found. Please install MetaMask.");
@@ -417,19 +394,17 @@ const DeFiUtilsPage = () => {
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
 
       console.log("Contract address:", DeFiUtilsContract.address);
       console.log("Contract ABI length:", DeFiUtilsContract.abi.length);
-      console.log("Available functions:", DeFiUtilsContract.abi.filter(item => item.type === 'function').map(item => item.name));
+      console.log(
+        "Available functions:",
+        DeFiUtilsContract.abi.filter(item => item.type === "function").map(item => item.name),
+      );
 
       // Try to read a simple property or call a view function
       toast.success("Contract connection test successful! Check console for details.");
-      
     } catch (error) {
       console.error("Contract connection test failed:", error);
       toast.error("Contract connection test failed. Check console for details.");
@@ -439,14 +414,10 @@ const DeFiUtilsPage = () => {
   // Test compound yield with known values
   const testCompoundYield = async (): Promise<void> => {
     console.log("🧪 Testing Compound Yield with known values...");
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
 
       // Test with very simple values
       const testPrincipal = BigInt(1000000000000000000); // 1 ETH
@@ -460,16 +431,10 @@ const DeFiUtilsPage = () => {
       console.log("- Time:", testTime.toString(), "scaled years (1 year)");
       console.log("- Frequency:", testFreq);
 
-      const result = await contract.calculateCompoundYield(
-        testPrincipal,
-        testRate,
-        testTime,
-        testFreq
-      );
+      const result = await contract.calculateCompoundYield(testPrincipal, testRate, testTime, testFreq);
 
       console.log("🧪 Test result:", result.toString());
       toast.success(`Test result: ${result.toString()}`);
-      
     } catch (error) {
       console.error("🧪 Test failed:", error);
       toast.error("Test failed. Check console for details.");
@@ -479,14 +444,10 @@ const DeFiUtilsPage = () => {
   // Test simple yield function
   const testSimpleYield = async (): Promise<void> => {
     console.log("🧪 Testing Simple Yield with known values...");
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
 
       // Test with very simple values
       const testPrincipal = BigInt(1000000000000000000); // 1 ETH
@@ -498,16 +459,11 @@ const DeFiUtilsPage = () => {
       console.log("- Rate:", testRate.toString(), "wei (10%)");
       console.log("- Time:", testTime.toString(), "seconds (1 year)");
 
-      const result = await contract.calculateSimpleYield(
-        testPrincipal,
-        testRate,
-        testTime
-      );
+      const result = await contract.calculateSimpleYield(testPrincipal, testRate, testTime);
 
       console.log("🧪 Simple Yield Test result:", result.toString());
       console.log("🧪 Expected: ~0.1 ETH (10% of 1 ETH)");
       toast.success(`Simple Yield Test result: ${result.toString()}`);
-      
     } catch (error) {
       console.error("🧪 Simple Yield Test failed:", error);
       toast.error("Simple Yield Test failed. Check console for details.");
@@ -517,14 +473,10 @@ const DeFiUtilsPage = () => {
   // Test impermanent loss function
   const testImpermanentLoss = async (): Promise<void> => {
     console.log("🧪 Testing Impermanent Loss with known values...");
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
 
       // Test with very simple values
       const testInitialTokenAAmount = BigInt(1000000000000000000); // 1 ETH
@@ -542,12 +494,11 @@ const DeFiUtilsPage = () => {
         testInitialTokenAAmount,
         testInitialTokenBAmount,
         testCurrentTokenAPrice,
-        testCurrentTokenBPrice
+        testCurrentTokenBPrice,
       );
 
       console.log("🧪 Impermanent Loss Test result:", result.toString());
       toast.success(`Impermanent Loss Test result: ${result.toString()}`);
-      
     } catch (error) {
       console.error("🧪 Impermanent Loss Test failed:", error);
       toast.error("Impermanent Loss Test failed. Check console for details.");
@@ -557,14 +508,10 @@ const DeFiUtilsPage = () => {
   // Test swap fee function
   const testSwapFee = async (): Promise<void> => {
     console.log("🧪 Testing Swap Fee with known values...");
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(
-        DeFiUtilsContract.address,
-        DeFiUtilsContract.abi,
-        provider
-      );
+      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
 
       // Test with very simple values
       const testAmountIn = BigInt(1000000000000000000); // 1 ETH
@@ -574,15 +521,11 @@ const DeFiUtilsPage = () => {
       console.log("- Amount In:", testAmountIn.toString(), "wei (1 ETH)");
       console.log("- Fee Percentage:", testFeePercentage.toString(), "wei (0.3%)");
 
-      const result = await contract.calculateSwapFee(
-        testAmountIn,
-        testFeePercentage
-      );
+      const result = await contract.calculateSwapFee(testAmountIn, testFeePercentage);
 
       console.log("🧪 Swap Fee Test result:", result.toString());
       console.log("🧪 Expected: 3000000000000000 wei (0.003 ETH)");
       toast.success(`Swap Fee Test result: ${result.toString()}`);
-      
     } catch (error) {
       console.error("🧪 Swap Fee Test failed:", error);
       toast.error("Swap Fee Test failed. Check console for details.");
@@ -600,9 +543,7 @@ const DeFiUtilsPage = () => {
           <div className="text-center mb-8">
             <div className="text-6xl mb-4"></div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-2">Calculation Complete!</h2>
-            <p className="text-xl text-gray-300">
-              {currentResult.type} calculation finished successfully
-            </p>
+            <p className="text-xl text-gray-300">{currentResult.type} calculation finished successfully</p>
           </div>
 
           {/* Result Display */}
@@ -667,8 +608,12 @@ const DeFiUtilsPage = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
-            <p className="text-gray-300 mb-6">Please connect your wallet to any EVM-compatible network to use DeFi utilities.</p>
-            <p className="text-xs text-gray-400">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+            <p className="text-gray-300 mb-6">
+              Please connect your wallet to any EVM-compatible network to use DeFi utilities.
+            </p>
+            <p className="text-xs text-gray-400">
+              Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+            </p>
           </div>
         ) : (
           <>
@@ -738,22 +683,22 @@ const DeFiUtilsPage = () => {
                     disabled={isCalculating || !token0Amount || !token1Amount}
                     className={`px-6 py-3 rounded-lg transition-colors ${
                       isCalculating || !token0Amount || !token1Amount
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed" 
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-purple-600 hover:bg-purple-700 text-white"
                     }`}
                   >
                     {isCalculating ? "Calculating..." : "Calculate Liquidity"}
                   </button>
-                  
+
                   {/* Input Status */}
                   <div className="mt-4 text-sm text-gray-400">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`w-2 h-2 rounded-full ${token0Amount ? 'bg-green-500' : 'bg-gray-500'}`}></span>
-                      Token 0 Amount: {token0Amount || 'Not set'}
+                      <span className={`w-2 h-2 rounded-full ${token0Amount ? "bg-green-500" : "bg-gray-500"}`}></span>
+                      Token 0 Amount: {token0Amount || "Not set"}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${token1Amount ? 'bg-green-500' : 'bg-gray-500'}`}></span>
-                      Token 1 Amount: {token1Amount || 'Not set'}
+                      <span className={`w-2 h-2 rounded-full ${token1Amount ? "bg-green-500" : "bg-gray-500"}`}></span>
+                      Token 1 Amount: {token1Amount || "Not set"}
                     </div>
                   </div>
                 </div>
@@ -826,8 +771,8 @@ const DeFiUtilsPage = () => {
                       onClick={calculateSimpleYield}
                       disabled={isCalculating}
                       className={`px-6 py-3 rounded-lg transition-colors ${
-                        isCalculating 
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed" 
+                        isCalculating
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                           : "bg-purple-600 hover:bg-purple-700 text-white"
                       }`}
                     >
@@ -837,8 +782,8 @@ const DeFiUtilsPage = () => {
                       onClick={calculateCompoundYield}
                       disabled={isCalculating}
                       className={`px-6 py-3 rounded-lg transition-colors ${
-                        isCalculating 
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed" 
+                        isCalculating
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                           : "bg-purple-600 hover:bg-purple-700 text-white"
                       }`}
                     >
@@ -914,8 +859,8 @@ const DeFiUtilsPage = () => {
                     onClick={calculateImpermanentLoss}
                     disabled={isCalculating}
                     className={`px-6 py-3 rounded-lg transition-colors ${
-                      isCalculating 
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed" 
+                      isCalculating
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-purple-600 hover:bg-purple-700 text-white"
                     }`}
                   >
@@ -962,8 +907,8 @@ const DeFiUtilsPage = () => {
                     onClick={calculateSwapFee}
                     disabled={isCalculating}
                     className={`px-6 py-3 rounded-lg transition-colors ${
-                      isCalculating 
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed" 
+                      isCalculating
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-purple-600 hover:bg-purple-700 text-white"
                     }`}
                   >

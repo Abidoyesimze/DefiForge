@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { MerkleProofContract } from "../../ABI";
+import TestImport from "../../components/TestImport";
 import { generateMerkleTree as buildMerkleTree } from "../../utils/Merkle";
 import { MerkleTree } from "../../utils/Merkle";
 import { ethers } from "ethers";
@@ -19,8 +21,6 @@ import {
   TrashIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import TestImport from "../../components/TestImport";
-import { MerkleProofContract } from "../../ABI";
 
 // Contract address - update this with your deployed contract address
 const CONTRACT_ADDRESS = "0x..."; // Replace with your actual contract address
@@ -71,7 +71,7 @@ const MerkleGenerator = () => {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, MerkleProofContract.abi, signer);
-        
+
         setContract(contractInstance);
         setSigner(signer);
 
@@ -123,7 +123,7 @@ const MerkleGenerator = () => {
             description: info.description,
             creator: info.creator,
             listSize: Number(info.listSize),
-            timestamp: Number(info.timestamp)
+            timestamp: Number(info.timestamp),
           });
         } else {
           setTreeInfo(null);
@@ -367,12 +367,9 @@ const MerkleGenerator = () => {
       // Estimate gas with a buffer
       let gasEstimate;
       try {
-        gasEstimate = await contract.addMerkleTree.estimateGas(
-          merkleRoot,
-          treeDescription,
-          addresses.length,
-          { value: fee }
-        );
+        gasEstimate = await contract.addMerkleTree.estimateGas(merkleRoot, treeDescription, addresses.length, {
+          value: fee,
+        });
         // Add 20% buffer to gas estimate
         gasEstimate = (gasEstimate * 120n) / 100n;
       } catch (error) {
@@ -381,22 +378,17 @@ const MerkleGenerator = () => {
       }
 
       // Send transaction with manual gas settings
-      const tx = await contract.addMerkleTree(
-        merkleRoot,
-        treeDescription,
-        addresses.length,
-        {
-          value: fee,
-          gasLimit: gasEstimate,
-        }
-      );
+      const tx = await contract.addMerkleTree(merkleRoot, treeDescription, addresses.length, {
+        value: fee,
+        gasLimit: gasEstimate,
+      });
 
       setTxHash(tx.hash);
       toast.info("Transaction submitted, waiting for confirmation...");
 
       // Wait for confirmation
       const receipt = await tx.wait();
-      
+
       if (receipt.status === 1) {
         setTxStatus("confirmed");
         toast.success("Merkle root successfully published to the blockchain!");
@@ -465,7 +457,7 @@ const MerkleGenerator = () => {
       toast.info("Transaction submitted, waiting for confirmation...");
 
       const receipt = await tx.wait();
-      
+
       if (receipt.status === 1) {
         setTxStatus("confirmed");
         toast.success("Merkle root successfully removed from the blockchain!");
@@ -525,7 +517,7 @@ const MerkleGenerator = () => {
       toast.info("Transaction submitted, waiting for confirmation...");
 
       const receipt = await tx.wait();
-      
+
       if (receipt.status === 1) {
         setTxStatus("confirmed");
         toast.success("Merkle tree description successfully updated!");
@@ -614,7 +606,9 @@ const MerkleGenerator = () => {
             Generate Merkle proofs for your whitelist, airdrop, or any other permissioned system. Upload addresses, get
             your Merkle root and proofs.
           </p>
-          <p className="text-xs text-gray-400 mb-4">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+          <p className="text-xs text-gray-400 mb-4">
+            Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+          </p>
 
           <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-800">
             <h3 className="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2">
@@ -847,11 +841,8 @@ const MerkleGenerator = () => {
                       {platformFee && BigInt(platformFee) > 0 && (
                         <div className="mb-4 p-3 bg-gray-700 rounded-lg text-sm">
                           <p className="text-gray-300">
-                            <span className="font-medium">Platform Fee:</span>{" "}
-                            {formatEther(BigInt(platformFee))} ETH
-                            {isNewcomer && (
-                              <span className="ml-2 text-green-400">(First tree is free!)</span>
-                            )}
+                            <span className="font-medium">Platform Fee:</span> {formatEther(BigInt(platformFee))} ETH
+                            {isNewcomer && <span className="ml-2 text-green-400">(First tree is free!)</span>}
                           </p>
                         </div>
                       )}

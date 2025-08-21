@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ContractTemplatesContract } from "../../ABI";
-import { toast } from "react-toastify";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { ethers } from "ethers";
+import { toast } from "react-toastify";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 // Define types for better type safety
 interface DeploymentParams {
@@ -48,7 +48,7 @@ const ContractTemplatesPage = () => {
           const network = await provider.getNetwork();
           setNetworkInfo({
             chainId: network.chainId.toString(),
-            name: network.name || "Unknown"
+            name: network.name || "Unknown",
           });
         } catch (error) {
           console.error("Error getting network info:", error);
@@ -69,14 +69,14 @@ const ContractTemplatesPage = () => {
         "Configurable staking and reward tokens",
         "Flexible reward rate system",
         "Secure withdrawal mechanisms",
-        "Owner-controlled parameters"
+        "Owner-controlled parameters",
       ],
       icon: "🏦",
       category: "DeFi",
       contractFunction: "deployStakingContract",
       requiredParams: ["stakingToken", "rewardToken", "rewardRate"],
       gasEstimate: "~800,000",
-      complexity: "Intermediate"
+      complexity: "Intermediate",
     },
     {
       id: "vesting",
@@ -86,32 +86,27 @@ const ContractTemplatesPage = () => {
         "Linear vesting over time",
         "Configurable vesting period",
         "Emergency pause functionality",
-        "Owner controls"
+        "Owner controls",
       ],
       icon: "⏰",
       category: "Token Management",
       contractFunction: "deployVestingContract",
       requiredParams: ["token", "beneficiary", "totalAmount", "startTime", "duration"],
       gasEstimate: "~600,000",
-      complexity: "Intermediate"
+      complexity: "Intermediate",
     },
     {
       id: "multisig",
       name: "Multi-Signature Wallet",
       description: "Secure multi-signature wallet for team funds and governance",
-      features: [
-        "Configurable signer count",
-        "Threshold-based approvals",
-        "Add/remove signers",
-        "Emergency pause"
-      ],
+      features: ["Configurable signer count", "Threshold-based approvals", "Add/remove signers", "Emergency pause"],
       icon: "🔐",
       category: "Security",
       contractFunction: "deployMultiSigWallet",
       requiredParams: ["owners", "requiredSignatures"],
       gasEstimate: "~500,000",
-      complexity: "Advanced"
-    }
+      complexity: "Advanced",
+    },
   ];
 
   // Handle template selection
@@ -136,16 +131,16 @@ const ContractTemplatesPage = () => {
 
     try {
       setIsDeploying(true);
-      
+
       // Prepare deployment arguments based on template
       let args: any[] = [];
-      
+
       switch (template.id) {
         case "staking":
           args = [
             deploymentParams.stakingToken || "0x0000000000000000000000000000000000000000",
             deploymentParams.rewardToken || "0x0000000000000000000000000000000000000000",
-            BigInt(deploymentParams.rewardRate || "1000000000000000000") // 1 token per second
+            BigInt(deploymentParams.rewardRate || "1000000000000000000"), // 1 token per second
           ];
           break;
         case "vesting":
@@ -154,20 +149,20 @@ const ContractTemplatesPage = () => {
             deploymentParams.beneficiary || address,
             BigInt(deploymentParams.totalAmount || "1000000000000000000000"), // 1000 tokens
             BigInt(deploymentParams.startTime || Math.floor(Date.now() / 1000)), // Now
-            BigInt(deploymentParams.duration || "31536000") // 1 year
+            BigInt(deploymentParams.duration || "31536000"), // 1 year
           ];
           break;
         case "multisig":
-          const signers = deploymentParams.owners ? 
-            deploymentParams.owners.split(",").map((s: string) => s.trim()) : 
-            [address];
+          const signers = deploymentParams.owners
+            ? deploymentParams.owners.split(",").map((s: string) => s.trim())
+            : [address];
           args = [signers, BigInt(deploymentParams.requiredSignatures || "1")];
           break;
       }
 
       // Validate required parameters
-      const missingParams = template.requiredParams.filter(param => 
-        !deploymentParams[param] || deploymentParams[param] === ""
+      const missingParams = template.requiredParams.filter(
+        param => !deploymentParams[param] || deploymentParams[param] === "",
       );
 
       if (missingParams.length > 0) {
@@ -210,49 +205,37 @@ const ContractTemplatesPage = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Staking Token Address *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Staking Token Address *</label>
               <input
                 type="text"
                 value={deploymentParams.stakingToken || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, stakingToken: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, stakingToken: e.target.value })}
                 placeholder="0x..."
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Address of the token users will stake
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Address of the token users will stake</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Reward Token Address *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Reward Token Address *</label>
               <input
                 type="text"
                 value={deploymentParams.rewardToken || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, rewardToken: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, rewardToken: e.target.value })}
                 placeholder="0x..."
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Address of the token users will earn as rewards
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Address of the token users will earn as rewards</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Reward Rate (tokens per second) *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Reward Rate (tokens per second) *</label>
               <input
                 type="text"
                 value={deploymentParams.rewardRate || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, rewardRate: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, rewardRate: e.target.value })}
                 placeholder="1000000000000000000"
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Amount of reward tokens distributed per second (in wei)
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Amount of reward tokens distributed per second (in wei)</p>
             </div>
           </div>
         );
@@ -260,58 +243,44 @@ const ContractTemplatesPage = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Token Address *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Token Address *</label>
               <input
                 type="text"
                 value={deploymentParams.token || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, token: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, token: e.target.value })}
                 placeholder="0x..."
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Address of the token being vested
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Address of the token being vested</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Beneficiary Address *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Beneficiary Address *</label>
               <input
                 type="text"
                 value={deploymentParams.beneficiary || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, beneficiary: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, beneficiary: e.target.value })}
                 placeholder={address || "0x..."}
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Address that will receive the vested tokens
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Address that will receive the vested tokens</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Total Amount (in wei) *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Total Amount (in wei) *</label>
               <input
                 type="text"
                 value={deploymentParams.totalAmount || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, totalAmount: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, totalAmount: e.target.value })}
                 placeholder="1000000000000000000000"
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Total amount of tokens to vest
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Total amount of tokens to vest</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Start Time (Unix timestamp) *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Start Time (Unix timestamp) *</label>
               <input
                 type="number"
                 value={deploymentParams.startTime || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, startTime: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, startTime: e.target.value })}
                 placeholder={Math.floor(Date.now() / 1000).toString()}
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
@@ -320,19 +289,15 @@ const ContractTemplatesPage = () => {
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Duration (in seconds) *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Duration (in seconds) *</label>
               <input
                 type="number"
                 value={deploymentParams.duration || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, duration: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, duration: e.target.value })}
                 placeholder="31536000"
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                How long vesting takes (1 year = 31,536,000 seconds)
-              </p>
+              <p className="text-xs text-gray-400 mt-1">How long vesting takes (1 year = 31,536,000 seconds)</p>
             </div>
           </div>
         );
@@ -346,29 +311,23 @@ const ContractTemplatesPage = () => {
               <input
                 type="text"
                 value={deploymentParams.owners || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, owners: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, owners: e.target.value })}
                 placeholder={address || "0x..."}
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Comma-separated list of owner addresses
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Comma-separated list of owner addresses</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Required Signatures *
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Required Signatures *</label>
               <input
                 type="number"
                 value={deploymentParams.requiredSignatures || ""}
-                onChange={(e) => setDeploymentParams({...deploymentParams, requiredSignatures: e.target.value})}
+                onChange={e => setDeploymentParams({ ...deploymentParams, requiredSignatures: e.target.value })}
                 placeholder="1"
                 min="1"
                 className="w-full px-4 py-3 bg-[#0f1a2e] border border-[#2a3b54] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 transition-all duration-200"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Number of signatures required to execute transactions
-              </p>
+              <p className="text-xs text-gray-400 mt-1">Number of signatures required to execute transactions</p>
             </div>
           </div>
         );
@@ -389,12 +348,8 @@ const ContractTemplatesPage = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">{template?.icon}</div>
-            <h2 className="text-3xl font-bold text-emerald-400 mb-2">
-              Deploy {template?.name}
-            </h2>
-            <p className="text-xl text-gray-300">
-              Configure parameters and deploy your smart contract
-            </p>
+            <h2 className="text-3xl font-bold text-emerald-400 mb-2">Deploy {template?.name}</h2>
+            <p className="text-xl text-gray-300">Configure parameters and deploy your smart contract</p>
           </div>
 
           {/* Template Info */}
@@ -472,14 +427,18 @@ const ContractTemplatesPage = () => {
           <div className="text-center p-8 bg-[#1c2941] rounded-xl border border-[#2a3b54]">
             <div className="text-4xl mb-4">🔒</div>
             <h2 className="text-xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-gray-300">Please connect your wallet to any EVM-compatible network to deploy contract templates.</p>
-            <p className="text-xs text-gray-400 mt-2">Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)</p>
+            <p className="text-gray-300">
+              Please connect your wallet to any EVM-compatible network to deploy contract templates.
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
+            </p>
           </div>
         ) : (
           <>
             {/* Templates Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {templates.map((template) => (
+              {templates.map(template => (
                 <div
                   key={template.id}
                   className="bg-[#1c2941] p-6 rounded-xl border border-[#2a3b54] shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group"
@@ -493,18 +452,14 @@ const ContractTemplatesPage = () => {
                   <h3 className="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors duration-300">
                     {template.name}
                   </h3>
-                  <p className="text-gray-300 mb-4 text-sm">
-                    {template.description}
-                  </p>
+                  <p className="text-gray-300 mb-4 text-sm">{template.description}</p>
 
                   {/* Template Metadata */}
                   <div className="flex items-center justify-between mb-4 text-xs">
                     <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 rounded-full">
                       {template.category}
                     </span>
-                    <span className="px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full">
-                      {template.complexity}
-                    </span>
+                    <span className="px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full">{template.complexity}</span>
                   </div>
 
                   {/* Features */}
@@ -559,9 +514,7 @@ const ContractTemplatesPage = () => {
                   <h3 className="text-lg font-semibold mb-2 text-white">Network</h3>
                   <div className="text-emerald-400 font-semibold">EVM-Compatible Network</div>
                   <div className="text-gray-400 text-sm">Chain ID: {networkInfo?.chainId || "..."}</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Supported: ETN (5201420), Somnia (50312)
-                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Supported: ETN (5201420), Somnia (50312)</div>
                 </div>
               </div>
             </div>
@@ -572,7 +525,10 @@ const ContractTemplatesPage = () => {
                 <h2 className="text-2xl font-bold mb-4 text-emerald-400">Recently Deployed</h2>
                 <div className="space-y-2">
                   {deployedContracts.map((contract, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-[#0f1a2e] rounded-lg border border-[#1e2a3a]">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-[#0f1a2e] rounded-lg border border-[#1e2a3a]"
+                    >
                       <span className="text-gray-300">Contract {index + 1}</span>
                       <code className="text-emerald-400 text-sm">{contract}</code>
                     </div>

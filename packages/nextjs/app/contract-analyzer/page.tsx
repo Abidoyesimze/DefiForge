@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ContractAnalyzerContract, DeFiUtilsContract, ERC20FactoryContract } from "../../ABI";
+import { ContractAnalyzerContract, DeFiUtilsContract, ERC20FactoryContract, getContractAddress } from "../../ABI";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount, useReadContract } from "wagmi";
@@ -86,7 +86,7 @@ const ContractAnalyzerPage = () => {
       // Use ethers.js directly (same fix as Token Factory)
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(ContractAnalyzerContract.address, ContractAnalyzerContract.abi, signer);
+      const contract = new ethers.Contract(getContractAddress("ContractAnalyzer"), ContractAnalyzerContract.abi, signer);
 
       // Estimate gas properly
       const gasEstimate = await contract.analyzeContract.estimateGas(contractAddress);
@@ -171,9 +171,9 @@ const ContractAnalyzerPage = () => {
 
   // Sample contract addresses for quick testing
   const sampleAddresses = [
-    { name: "Token Factory", address: ERC20FactoryContract.address },
-    { name: "DeFi Utils", address: DeFiUtilsContract.address },
-    { name: "Contract Analyzer", address: ContractAnalyzerContract.address },
+    { name: "Token Factory", address: getContractAddress("ERC20Factory") },
+    { name: "DeFi Utils", address: getContractAddress("DeFiUtils") },
+    { name: "Contract Analyzer", address: getContractAddress("ContractAnalyzer") },
   ];
 
   const handleSampleAddress = (address: string) => {
@@ -203,8 +203,8 @@ const ContractAnalyzerPage = () => {
     if (!showResultsModal || !formattedResult) return null;
 
     const getExplorerLink = (address: string, txHash: string) => {
-      // Use a generic explorer or detect from network
-      const baseExplorerUrl = "https://etherscan.io"; // Default to Etherscan
+      // Use ETN testnet explorer for better integration
+      const baseExplorerUrl = "https://testnet-blockexplorer.electroneum.com";
       return {
         contract: `${baseExplorerUrl}/address/${address}`,
         transaction: `${baseExplorerUrl}/tx/${txHash}`,

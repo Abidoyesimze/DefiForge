@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ERC20FactoryABI, ERC721FactoryABI, ERC1155FactoryABI } from "../../ABI";
+import { ERC20FactoryABI, ERC721FactoryABI, ERC1155FactoryABI, getContractAddress } from "../../ABI";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
+import ContractVerification from "../../components/ContractVerification";
 
 type TokenType = "erc20" | "erc721" | "erc1155";
 
@@ -29,15 +30,23 @@ const TokenFactoryPage = () => {
     const checkNetwork = async () => {
       if (isConnected && window.ethereum) {
         try {
+          console.log("🔍 Checking network...");
           const provider = new ethers.BrowserProvider(window.ethereum);
           const network = await provider.getNetwork();
-          setNetworkInfo({
+          console.log("🌐 Network detected:", network);
+          
+          const networkInfo = {
             chainId: network.chainId.toString(),
             name: network.name || "Unknown",
-          });
+          };
+          
+          console.log("📡 Setting network info:", networkInfo);
+          setNetworkInfo(networkInfo);
         } catch (error) {
-          console.error("Error checking network:", error);
+          console.error("❌ Error checking network:", error);
         }
+      } else {
+        console.log("⚠️ Wallet not connected or ethereum not available");
       }
     };
 
@@ -98,6 +107,10 @@ const TokenFactoryPage = () => {
       return;
     }
 
+    console.log("🚀 Starting token deployment...");
+    console.log("Network Info:", networkInfo);
+    console.log("Selected Token Type:", selectedTokenType);
+
     setIsDeploying(true);
 
     try {
@@ -114,8 +127,11 @@ const TokenFactoryPage = () => {
 
       switch (selectedTokenType) {
         case "erc20":
+          const erc20Address = getContractAddress("ERC20Factory");
+          console.log("🔗 Using ERC20Factory address:", erc20Address);
+          
           const erc20Contract = new ethers.Contract(
-            "0x4F6D41C9F94FdD64c8D82C4eb71a459075E5Ae57", // ERC20Factory address
+            erc20Address, // Use network-aware address
             ERC20FactoryABI,
             signer,
           );
@@ -147,8 +163,11 @@ const TokenFactoryPage = () => {
           break;
 
         case "erc721":
+          const erc721Address = getContractAddress("ERC721Factory");
+          console.log("🔗 Using ERC721Factory address:", erc721Address);
+          
           const erc721Contract = new ethers.Contract(
-            "0x915C81F20f8A6fFe4A19342B2C54Bf0840C37B9A", // ERC721Factory address
+            erc721Address, // Use network-aware address
             ERC721FactoryABI,
             signer,
           );
@@ -182,8 +201,11 @@ const TokenFactoryPage = () => {
           break;
 
         case "erc1155":
+          const erc1155Address = getContractAddress("ERC1155Factory");
+          console.log("🔗 Using ERC1155Factory address:", erc1155Address);
+          
           const erc1155Contract = new ethers.Contract(
-            "0xaA65bf9B2c119Df5043498f0C78D7FC1a6F6F4B4", // ERC1155Factory address
+            erc1155Address, // Use network-aware address
             ERC1155FactoryABI,
             signer,
           );
@@ -218,6 +240,8 @@ const TokenFactoryPage = () => {
       }
 
       if (deployedAddress) {
+        console.log("✅ Token deployed successfully at:", deployedAddress);
+        
         // Create deployment result object
         const result: DeploymentResult = {
           type: selectedTokenType.toUpperCase(),
@@ -247,10 +271,14 @@ const TokenFactoryPage = () => {
           },
         };
 
+        console.log("📋 Setting deployment result:", result);
         setDeploymentResult(result);
         setShowSuccessModal(true);
+        console.log("🎉 Success modal should now be visible!");
 
         toast.success(`${selectedTokenType.toUpperCase()} token deployed successfully!`);
+      } else {
+        console.log("❌ No deployed address found in transaction receipt");
       }
     } catch (error: any) {
       console.error("Deployment error:", error);
@@ -276,14 +304,85 @@ const TokenFactoryPage = () => {
   const SuccessModal = (): React.JSX.Element | null => {
     if (!showSuccessModal || !deploymentResult) return null;
 
+    // Get network display information
+    const getNetworkDisplay = () => {
+      if (!networkInfo) {
+        return {
+          name: "Unknown Network",
+          chainId: "Unknown",
+          explorer: "https://etherscan.io",
+          color: "text-gray-400",
+          bgColor: "bg-gray-900/20",
+          borderColor: "border-gray-500/30"
+        };
+      }
+      
+      const chainId = networkInfo.chainId;
+      if (chainId === "5201420") {
+        return {
+          name: "ETN Testnet",
+          chainId: "5201420",
+          explorer: "https://testnet-blockexplorer.electroneum.com",
+          color: "text-blue-400",
+          bgColor: "bg-blue-900/20",
+          borderColor: "border-blue-500/30"
+        };
+      } else if (chainId === "50312") {
+        return {
+          name: "Somnia Testnet", 
+          chainId: "50312",
+          explorer: "https://shannon-explorer.somnia.network",
+          color: "text-purple-400",
+          bgColor: "bg-purple-900/20",
+          borderColor: "border-purple-500/30"
+        };
+      } else {
+        return {
+          name: networkInfo.name || "Unknown Network",
+          chainId: chainId,
+          explorer: "https://etherscan.io",
+          color: "text-gray-400",
+          bgColor: "bg-gray-900/20",
+          borderColor: "border-gray-500/30"
+        };
+      }
+    };
+
+    const network = getNetworkDisplay();
+
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-[#1c2941] rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#2a3b54] shadow-2xl">
+        <div className="bg-[#1c2941] rounded-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#2a3b54] shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-2">Token Deployed Successfully!</h2>
-            <p className="text-xl text-gray-300">Your {deploymentResult.type} token has been created</p>
+            <p className="text-xl text-gray-300">Your {deploymentResult.type} token has been created on {network.name}</p>
+          </div>
+
+          {/* Network Information */}
+          <div className={`${network.bgColor} rounded-xl p-6 mb-6 border ${network.borderColor}`}>
+            <h3 className="text-lg font-semibold mb-4 text-emerald-400">Network Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${network.color.replace('text-', 'bg-')}`}></div>
+                <div>
+                  <div className="text-white font-medium">{network.name}</div>
+                  <div className="text-sm text-gray-400">Chain ID: {network.chainId}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-400 mb-1">Block Explorer</div>
+                <a 
+                  href={`${network.explorer}/address/${deploymentResult.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-sm ${network.color} hover:underline`}
+                >
+                  View on Explorer →
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Token Info Display */}
@@ -291,7 +390,10 @@ const TokenFactoryPage = () => {
             <h3 className="text-lg font-semibold mb-3 text-emerald-400">Token Details</h3>
             <div className="text-2xl font-bold text-white mb-2">{deploymentResult.name}</div>
             <div className="text-lg text-emerald-400 mb-4">{deploymentResult.symbol}</div>
-            <div className="text-sm text-gray-400 break-all">{deploymentResult.address}</div>
+            <div className="bg-[#1a2332] p-3 rounded-lg border border-[#2a3b54]">
+              <div className="text-sm text-gray-400 mb-1">Contract Address</div>
+              <div className="text-sm text-emerald-400 font-mono break-all">{deploymentResult.address}</div>
+            </div>
           </div>
 
           {/* Configuration Summary */}
@@ -299,22 +401,57 @@ const TokenFactoryPage = () => {
             <h3 className="text-lg font-semibold mb-4 text-emerald-400">Configuration</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(deploymentResult.inputs).map(([key, value]) => (
-                <div key={key} className="flex justify-between">
-                  <span className="text-gray-400">{key}:</span>
-                  <span className="text-white font-medium">{value}</span>
+                <div key={key} className="flex justify-between items-center p-2 bg-[#1a2332] rounded-lg">
+                  <span className="text-gray-400 text-sm">{key}:</span>
+                  <span className="text-white font-medium text-sm">{value}</span>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Contract Verification */}
+          <div className="mb-6">
+            <ContractVerification
+              contractAddress={deploymentResult.address}
+              networkChainId={networkInfo?.chainId || ""}
+              contractType="token"
+              contractName={deploymentResult.name}
+            />
+          </div>
+
+          {/* Next Steps */}
+          <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-xl p-6 mb-6 border border-[#2a3b54]">
+            <h3 className="text-lg font-semibold mb-4 text-amber-400">Next Steps</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+              <div className="space-y-2">
+                <div>• <strong>Verify Contract:</strong> Use the verification guide above to verify your contract</div>
+                <div>• <strong>Add to Wallet:</strong> Import the token address to your wallet</div>
+                <div>• <strong>Test Functions:</strong> Try minting, transferring, or other features</div>
+              </div>
+              <div className="space-y-2">
+                <div>• <strong>Share Address:</strong> Share the contract address with your community</div>
+                <div>• <strong>Monitor Activity:</strong> Track transactions and usage on the explorer</div>
+                <div>• <strong>Documentation:</strong> Keep track of your token&apos;s configuration</div>
+              </div>
+            </div>
+          </div>
+
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={deployAnother}
               className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
             >
               Deploy Another Token
             </button>
+            <a
+              href={`${network.explorer}/address/${deploymentResult.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02] text-center flex items-center justify-center"
+            >
+              View on Explorer
+            </a>
             <button
               onClick={() => setShowSuccessModal(false)}
               className="w-full py-4 px-6 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
@@ -364,6 +501,18 @@ const TokenFactoryPage = () => {
                   <p className="mt-1 text-xs text-gray-400">
                     Supported testnets: ETN (Chain ID: 5201420) and Somnia (Chain ID: 50312)
                   </p>
+                </div>
+                
+                {/* Debug Information */}
+                <div className="mt-4 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                  <h4 className="text-sm font-semibold text-blue-300 mb-2">Debug Info</h4>
+                  <div className="text-xs text-blue-200 space-y-1">
+                    <div>Current Network: {networkInfo?.name || "Unknown"}</div>
+                    <div>Chain ID: {networkInfo?.chainId || "Unknown"}</div>
+                    <div>ERC20 Factory: {getContractAddress("ERC20Factory")}</div>
+                    <div>ERC721 Factory: {getContractAddress("ERC721Factory")}</div>
+                    <div>ERC1155 Factory: {getContractAddress("ERC1155Factory")}</div>
+                  </div>
                 </div>
               </div>
             </div>

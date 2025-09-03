@@ -8,6 +8,27 @@ import ERC1155FactoryABI from "./ERC1155FactoryABI.json";
 import MerkleProofABI from "./MerkleProof.json";
 import MerkleProofValidatorABI from "./MerkleProofValidator.json";
 
+// Helper function to get contract address based on network
+export const getContractAddress = (contractName: string, network: 'etn' | 'somnia' = 'etn') => {
+  const contracts = {
+    ContractAnalyzer: ContractAnalyzerContract,
+    ContractTemplates: ContractTemplatesContract,
+    DeFiUtils: DeFiUtilsContract,
+    ERC20Factory: ERC20FactoryContract,
+    ERC721Factory: ERC721FactoryContract,
+    ERC1155Factory: ERC1155FactoryContract,
+    MerkleProof: MerkleProofContract,
+    MerkleProofValidator: MerkleProofValidatorContract,
+  };
+  
+  const contract = contracts[contractName as keyof typeof contracts];
+  if (!contract) {
+    throw new Error(`Contract ${contractName} not found`);
+  }
+  
+  return contract.addresses[network] || contract.address;
+};
+
 // Export individual ABIs for backward compatibility
 export {
   ContractAnalyzerABI,
@@ -36,7 +57,7 @@ export const ContractTemplatesContract = {
   address: "0x9f853686c5162A8E210dc9D13a8114f095Fc17F3", // ETN Testnet
   addresses: {
     etn: "0x9f853686c5162A8E210dc9D13a8114f095Fc17F3",
-    somnia: "0x157f375f0112837CA14c8dAFB9dFe26f83a94634",
+    somnia: "0x24AAE861EAd800726066145d998BaECb73e61bD7", // Updated to allow 2-of-2 multi-sig
   },
 };
 

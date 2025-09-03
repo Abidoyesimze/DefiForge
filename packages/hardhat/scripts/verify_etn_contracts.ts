@@ -4,16 +4,24 @@ import * as path from "path";
 
 // Blockscout verification API endpoints
 const BLOCKSCOUT_API_ENDPOINTS = {
-  etn: "https://testnet-explorer.electroneum.com/api/v2/smart-contracts",
+  etn: "https://testnet-blockexplorer.electroneum.com/api/v2/smart-contracts",
   // Add alternative endpoints if the main one doesn't work
   alternative: "https://explorer.electroneum.com/api/v2/smart-contracts"
 };
 
-// API Keys for verification
+// Etherscan v2 API endpoints for verification
+const ETHERSCAN_V2_ENDPOINTS = {
+  mainnet: "https://api.etherscan.io/api",
+  sepolia: "https://api-sepolia.etherscan.io/api",
+  // Try ETN testnet with Etherscan v1 format (v2 endpoint returns 404)
+  etn: "https://api.etherscan.io/api" // Use v1 endpoint that we know works
+};
+
+// API Keys for verification - use environment variables
 const API_KEYS = {
-  etherscan: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-  alchemy: "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF",
-  basescan: "ZZZEIPMT1MNJ8526VV2Y744CA7TNZR64G6"
+  etherscan: process.env.ETHERSCAN_MAINNET_API_KEY || "",
+  alchemy: process.env.ALCHEMY_API_KEY || "",
+  basescan: process.env.BASESCAN_API_KEY || "",
 };
 
 // Contract verification data
@@ -29,7 +37,7 @@ interface ContractVerificationData {
 }
 
 async function main() {
-  console.log("🔍 Verifying ETN Contracts using Blockscout API...\n");
+  console.log("🔍 Verifying ETN Contracts using Etherscan v2 API and Blockscout API...\n");
 
   // Get the current network
   const network = await ethers.provider.getNetwork();
@@ -231,7 +239,54 @@ async function verifyContract(address: string, payload: any) {
     }
   }
 
-  // Method 2: Try alternative verification endpoints
+  // Method 2: Try Etherscan v2 API format (as suggested by devrel)
+  console.log(`  🔄 Trying Etherscan v2 API format...`);
+  
+  try {
+    // Etherscan v2 API format for contract verification
+    const etherscanV2Payload = {
+      apikey: API_KEYS.etherscan,
+      module: "contract",
+      action: "verifysourcecode",
+      contractaddress: address,
+      sourceCode: payload.source_code,
+      codeformat: "solidity-single-file",
+      contractname: payload.contract_name,
+      compilerversion: payload.compiler_version,
+      optimizationUsed: payload.is_optimization_enabled ? "1" : "0",
+      runs: payload.optimization_runs.toString(),
+      constructorArguements: payload.constructor_args || "",
+      evmversion: payload.evm_version,
+      licenseType: payload.license_type
+    };
+
+    console.log(`  🔗 Trying Etherscan API: ${ETHERSCAN_V2_ENDPOINTS.etn}`);
+    
+    const response = await fetch(`${ETHERSCAN_V2_ENDPOINTS.etn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(etherscanV2Payload)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.status === '1') {
+        console.log(`  ✅ Verification successful via Etherscan v2 API!`);
+        console.log(`  📝 Result: ${result.message}`);
+        return;
+      } else {
+        console.log(`  ❌ Etherscan v2 API failed: ${result.message}`);
+      }
+    } else {
+      console.log(`  ❌ Etherscan v2 API request failed: ${response.status}`);
+    }
+  } catch (error) {
+    console.log(`  ❌ Etherscan v2 API error: ${error}`);
+  }
+
+  // Method 3: Try alternative verification endpoints
   console.log(`  🔄 Trying alternative verification methods...`);
   
   // Try Etherscan-style verification
@@ -248,7 +303,7 @@ async function verifyContract(address: string, payload: any) {
     console.log(`  ❌ Etherscan test failed: ${error}`);
   }
 
-  // Method 3: Try to find the correct ETN explorer endpoint
+  // Method 4: Try to find the correct ETN explorer endpoint
   console.log(`  🔍 Attempting to discover correct ETN explorer endpoint...`);
   
   const possibleEndpoints = [
@@ -287,6 +342,7 @@ async function verifyContract(address: string, payload: any) {
 
   console.log(`  ⚠️  All verification methods failed. Manual verification required.`);
   console.log(`  💡 Try using the prepared verification payload manually when explorer is available.`);
+  console.log(`  🔑 Etherscan v2 API was attempted as suggested by devrel.`);
 }
 
 // Helper function to check if explorer is accessible

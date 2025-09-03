@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { MerkleProofContract } from "../../ABI";
-import TestImport from "../../components/TestImport";
 import { generateMerkleTree as buildMerkleTree } from "../../utils/Merkle";
 import { MerkleTree } from "../../utils/Merkle";
 import { ethers } from "ethers";
@@ -22,8 +21,8 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 
-// Contract address - update this with your deployed contract address
-const CONTRACT_ADDRESS = "0x..."; // Replace with your actual contract address
+// Contract address - use the actual deployed contract address from ABI
+const CONTRACT_ADDRESS = MerkleProofContract.address;
 
 // Define interface for tree info
 interface TreeInfo {
@@ -625,7 +624,32 @@ const MerkleGenerator = () => {
         <div className="space-y-6">
           {/* Debug Import Test */}
           <div className="rounded-lg p-6 bg-red-900/20 border border-red-500/30">
-            <TestImport />
+            <h3 className="text-lg font-semibold mb-4 text-white">Debug Import Test</h3>
+            <p className="text-sm text-gray-400">
+              This section is for debugging the address import functionality. It will generate a Merkle tree from a
+              predefined list of addresses.
+            </p>
+            <button
+              onClick={() => {
+                const testAddresses = [
+                  "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                  "0x1234567890123456789012345678901234567890",
+                  "0xabcdef1234567890abcdef1234567890abcdef1234",
+                  "0x1122334455667788990011223344556677889900",
+                ];
+                generateMerkleTree(testAddresses);
+                toast.success("Merkle tree generated from test addresses.");
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Generate Test Merkle Tree
+            </button>
+            <p className="mt-4 text-sm text-gray-400">
+              Current Merkle Root: <span className="font-mono text-gray-300">{merkleRoot || "N/A"}</span>
+            </p>
+            <p className="mt-2 text-sm text-gray-400">
+              Current Tree Size: <span className="font-mono text-gray-300">{merkleTree?.getHexRoot() ? "Valid" : "Invalid"}</span>
+            </p>
           </div>
 
           {/* File Upload Section */}
@@ -889,12 +913,12 @@ const MerkleGenerator = () => {
                           {txHash && (
                             <p className="mt-1">
                               <a
-                                href={`https://etherscan.io/tx/${txHash}`}
+                                href={`https://testnet-blockexplorer.electroneum.com/tx/${txHash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-purple-400 hover:text-purple-300 underline text-sm"
                               >
-                                View on Etherscan
+                                View on ETN Explorer
                               </a>
                             </p>
                           )}

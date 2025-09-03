@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DeFiUtilsContract } from "../../ABI";
+import { DeFiUtilsContract, getContractAddress } from "../../ABI";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
@@ -96,7 +96,7 @@ const DeFiUtilsPage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       console.log("✅ Provider created successfully");
 
-      const contract = new ethers.Contract(DeFiUtilsContract.address, DeFiUtilsContract.abi, provider);
+      const contract = new ethers.Contract(getContractAddress("DeFiUtils"), DeFiUtilsContract.abi, provider);
       console.log("✅ Contract instance created");
       console.log("Contract ABI methods:", Object.keys(contract.interface.fragments));
 

@@ -85,6 +85,33 @@ const features = [
     stats: "Proof Generation",
     badge: "Essential",
   },
+  {
+    title: "Contract Debugger",
+    description: "Debug and interact with deployed smart contracts. Read state variables and execute functions.",
+    icon: CodeBracketIcon,
+    link: "/debug",
+    color: "from-yellow-500 to-orange-500",
+    stats: "Contract Interaction",
+    badge: "Developer",
+  },
+  {
+    title: "Block Explorer",
+    description: "Explore blocks, transactions, and addresses on ETN and Somnia testnets.",
+    icon: GlobeAltIcon,
+    link: "/blockexplorer",
+    color: "from-cyan-500 to-blue-500",
+    stats: "Blockchain Explorer",
+    badge: "Network",
+  },
+  {
+    title: "Verification Guide",
+    description: "Learn how to verify your smart contracts on ETN and Somnia testnets.",
+    icon: ShieldCheckIcon,
+    link: "/contract-verification-guide",
+    color: "from-green-500 to-emerald-500",
+    stats: "Contract Verification",
+    badge: "Guide",
+  },
 ];
 
 const useCases = [
@@ -246,7 +273,7 @@ const Home = () => {
             </div>
 
             {/* Quick Navigation */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-3 max-w-7xl mx-auto">
               {features.map((feature, index) => (
                 <button
                   key={index}
